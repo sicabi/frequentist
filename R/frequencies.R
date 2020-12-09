@@ -168,53 +168,39 @@ frequencies <- function(x = vector(),
   }
   ## 1.7 Action for numeric and categorical vectors ------------------------------
   if (isTRUE(compare.valids)) {
-            if (var.class %in% c("double", "numeric")) { ## Count NAS
-              freqs.na <-  table(cut(x,
-                                     breaks = n.breaks,
-                                     right = FALSE, dig.lab = 6,
-                                     include.lowest = TRUE),
-                                 exclude = FALSE,
-                                 useNA = "ifany")
+            if (var.class %in% c("double", "numeric", "integer")) { ## Count NAS
+                       n.categories <- length(unique(x))
+                       if (n.categories > 9) {
+                         freqs.na <-  table(cut(x,
+                                                breaks = n.breaks,
+                                                right = FALSE, dig.lab = 6,
+                                                include.lowest = TRUE),
+                                            exclude = FALSE,
+                                            useNA = "ifany")
+                       } else {
+                         freqs.na <- table(classes = x, exclude = FALSE,
+                                           useNA = "ifany")
+                       }
             } else if (var.class %in% c("factor", "character", "logical")) {
               freqs.na <- table(classes = x, exclude = FALSE,
                                 useNA = "ifany")
-            } else if (var.class == "integer") {
-                  n.categories <- length(unique(x))
-                  if (n.categories > 9) {
-                    freqs.na <-  table(cut(x,
-                                           breaks = n.breaks,
-                                           right = FALSE, dig.lab = 6,
-                                           include.lowest = TRUE),
-                                       exclude = FALSE,
-                                       useNA = "ifany")
-                  } else {
-                    freqs.na <- table(classes = x, exclude = FALSE,
-                                      useNA = "ifany")
-                  }
-            }
-            if (var.class %in% c("double", "numeric")) { ## Exclude NAs
-              freqs <-  table(cut(x,
-                                  breaks = n.breaks,
-                                  right = FALSE, dig.lab = 6,
-                                  include.lowest = TRUE),
-                              exclude = TRUE,
-                              useNA = "no")
+            } 
+            if (var.class %in% c("double", "numeric", "integer")) { ## Exclude NAs
+              n.categories <- length(unique(x))
+              if (n.categories > 9) {
+                freqs <-  table(cut(x,
+                                    breaks = n.breaks,
+                                    right = FALSE, dig.lab = 6,
+                                    include.lowest = TRUE),
+                                exclude = TRUE,
+                                useNA = "no")
+              } else {
+                freqs <- table(classes = x, exclude = TRUE,
+                               useNA = "no")
+              }
             } else if (var.class %in% c("factor", "character", "logical")) {
               freqs <- table(classes = x, exclude = TRUE,
                              useNA = "no")
-            } else if (var.class == "integer") { ## Integers could be categorical or continuous
-              n.categories <- length(unique(x))
-                  if (n.categories > 9) {
-                    freqs <-  table(cut(x,
-                                        breaks = n.breaks,
-                                        right = FALSE, dig.lab = 6,
-                                        include.lowest = TRUE),
-                                    exclude = TRUE,
-                                    useNA = "no")
-                  } else {
-                    freqs <- table(classes = x, exclude = TRUE,
-                                   useNA = "no")
-                  }
             }
   } else {
     if (var.class %in% c("double", "numeric")) {
