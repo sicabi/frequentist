@@ -203,30 +203,23 @@ frequencies <- function(x = vector(),
                              useNA = "no")
             }
   } else {
-    if (var.class %in% c("double", "numeric")) {
-      freqs <-  table(cut(x,
-                          breaks = n.breaks,
-                          right = FALSE, dig.lab = 6,
-                          include.lowest = TRUE),
-                      exclude = !count.na,
-                      useNA = use)
+    if (var.class %in% c("double", "numeric", "integer")) {
+                n.categories <- length(unique(x))
+                if (n.categories > 9) {
+                  freqs <-  table(cut(x,
+                                      breaks = n.breaks,
+                                      right = FALSE, dig.lab = 6,
+                                      include.lowest = TRUE),
+                                  exclude = !count.na,
+                                  useNA = use)
+                } else {
+                  freqs <- table(classes = x, exclude = !count.na,
+                                 useNA = use)
+                }
     } else if (var.class %in% c("factor", "character", "logical")) {
       freqs <- table(classes = x, exclude = !count.na,
                      useNA = use)
-    } else if (var.class == "integer") {
-      n.categories <- length(unique(x))
-      if (n.categories > 9) {
-        freqs <-  table(cut(x,
-                            breaks = n.breaks,
-                            right = FALSE, dig.lab = 6,
-                            include.lowest = TRUE),
-                        exclude = !count.na,
-                        useNA = use)
-      } else {
-        freqs <- table(classes = x, exclude = !count.na,
-                       useNA = use)
-      }
-    }
+    } 
   }
 
 
