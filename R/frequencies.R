@@ -263,9 +263,10 @@ frequencies <- function(x = vector(),
       } else {
         freqs <- sort(freqs, decreasing = FALSE)
       }
-    } else {
+    } else if ( sum(is.na(freq.na)) > 0) {
       freqs <- c(freqs,0)
-    }
+    } else 
+      freqs <- freqs.na
   } else {
     if (isTRUE(sort.decreasing)) {
       if (isTRUE(count.na)) {
