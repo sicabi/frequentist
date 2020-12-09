@@ -5,7 +5,7 @@
 #' @param n.classes the number of classes for the numeric variable
 #' @param sort.decreasing sort frequencies decreasingly
 #' @param use.hist.classes for numeric variables, use the default classes for histograms
-#' @param count.na include NA values as part of the classes to be counted in
+#' @param count.na include NA values as part of the classes to be counted
 #' @param n.digits number of decimal places to display for relative frequencies
 #' @param show.totals show the sum of frequencies
 #' @param show.percent show relative frequencies as percentages
@@ -59,81 +59,81 @@ frequencies <- function(x = vector(),
                              isTRUE(show.rel.cumulative),
                            "all",
                            ifelse(    isTRUE(show.frequencies) &
+               isFALSE(show.relative) &
+               isFALSE(show.cumulative) &
+               isFALSE(show.rel.cumulative),
+             "only.freqs",
+             ifelse(    isTRUE(show.frequencies) &
+                          isTRUE(show.relative) &
+                          isFALSE(show.cumulative) &
+                          isFALSE(show.rel.cumulative),
+                        "freqs.and.relative",
+                        ifelse(
+              isTRUE(show.frequencies) &
+                isFALSE(show.relative) &
+                isTRUE(show.cumulative) &
+                isFALSE(show.rel.cumulative),
+              "freqs.and.cumulative", ifelse(
+                isTRUE(show.frequencies) &
+                  isTRUE(show.relative) &
+                  isTRUE(show.cumulative) &
+                  isFALSE(show.rel.cumulative),
+                "freqs.relative.and.cumulative",  ifelse(
+                  isTRUE(show.frequencies) &
+                    isTRUE(show.relative) &
+                    isFALSE(show.cumulative) &
+                    isTRUE(show.rel.cumulative),
+                  "freqs.and.relatives",  ifelse(
+                    isTRUE(show.frequencies) &
+                      isFALSE(show.relative) &
+                      isTRUE(show.cumulative) &
+                      isTRUE(show.rel.cumulative),
+                    "freqs.and.cumulatives",  ifelse(
+                      isTRUE(show.frequencies) &
+                        isFALSE(show.relative) &
+                        isFALSE(show.cumulative) &
+                        isTRUE(show.rel.cumulative),
+                      "freqs.and.rel.cumulative", ifelse(
+                        isFALSE(show.frequencies) &
+                          isTRUE(show.relative) &
+                          isTRUE(show.cumulative) &
+                          isTRUE(show.rel.cumulative),
+                        "relative.and.cumulatives",  ifelse(
+                          isFALSE(show.frequencies) &
+                            isTRUE(show.relative) &
+                            isTRUE(show.cumulative) &
+                            isFALSE(show.rel.cumulative),
+                          "relative.and.cumulative", ifelse(
+                            isFALSE(show.frequencies) &
+                              isTRUE(show.relative) &
+                              isFALSE(show.cumulative)  &
+                              isTRUE(show.rel.cumulative),
+                            "only.relatives",  ifelse(
+                              isFALSE(show.frequencies) &
+                                isTRUE(show.relative) &
+                                isFALSE(show.cumulative)  &
+                                isFALSE(show.rel.cumulative),
+                              "only.rel.freq",  ifelse(
+                                isFALSE(show.frequencies) &
+                                  isFALSE(show.relative) &
+                                  isTRUE(show.cumulative) &
+                                  isTRUE(show.rel.cumulative),
+                                "only.cumulatives",  ifelse(
+                                  isFALSE(show.frequencies) &
+                                    isFALSE(show.relative) &
+                                    isTRUE(show.cumulative)  &
+                                    isFALSE(show.rel.cumulative),
+                                  "only.cumulative",  ifelse(
+                                    isFALSE(show.frequencies) &
+                                      isFALSE(show.relative) &
+                                      isFALSE(show.cumulative) &
+                                      isTRUE(show.rel.cumulative),
+                                    "only.rel.cumulative",  ifelse(
+                                      isFALSE(show.frequencies) &
                                         isFALSE(show.relative) &
                                         isFALSE(show.cumulative) &
                                         isFALSE(show.rel.cumulative),
-                                      "only.freqs",
-                                      ifelse(    isTRUE(show.frequencies) &
-                                                   isTRUE(show.relative) &
-                                                   isFALSE(show.cumulative) &
-                                                   isFALSE(show.rel.cumulative),
-                                                 "freqs.and.relative",
-                                                 ifelse(
-                                                   isTRUE(show.frequencies) &
-                                                     isFALSE(show.relative) &
-                                                     isTRUE(show.cumulative) &
-                                                     isFALSE(show.rel.cumulative),
-                                                   "freqs.and.cumulative", ifelse(
-                                                     isTRUE(show.frequencies) &
-                                                       isTRUE(show.relative) &
-                                                       isTRUE(show.cumulative) &
-                                                       isFALSE(show.rel.cumulative),
-                                                     "freqs.relative.and.cumulative",  ifelse(
-                                                       isTRUE(show.frequencies) &
-                                                         isTRUE(show.relative) &
-                                                         isFALSE(show.cumulative) &
-                                                         isTRUE(show.rel.cumulative),
-                                                       "freqs.and.relatives",  ifelse(
-                                                         isTRUE(show.frequencies) &
-                                                           isFALSE(show.relative) &
-                                                           isTRUE(show.cumulative) &
-                                                           isTRUE(show.rel.cumulative),
-                                                         "freqs.and.cumulatives",  ifelse(
-                                                           isTRUE(show.frequencies) &
-                                                             isFALSE(show.relative) &
-                                                             isFALSE(show.cumulative) &
-                                                             isTRUE(show.rel.cumulative),
-                                                           "freqs.and.rel.cumulative", ifelse(
-                                                             isFALSE(show.frequencies) &
-                                                               isTRUE(show.relative) &
-                                                               isTRUE(show.cumulative) &
-                                                               isTRUE(show.rel.cumulative),
-                                                             "relative.and.cumulatives",  ifelse(
-                                                               isFALSE(show.frequencies) &
-                                                                 isTRUE(show.relative) &
-                                                                 isTRUE(show.cumulative) &
-                                                                 isFALSE(show.rel.cumulative),
-                                                               "relative.and.cumulative", ifelse(
-                                                                 isFALSE(show.frequencies) &
-                                                                   isTRUE(show.relative) &
-                                                                   isFALSE(show.cumulative)  &
-                                                                   isTRUE(show.rel.cumulative),
-                                                                 "only.relatives",  ifelse(
-                                                                   isFALSE(show.frequencies) &
-                                                                     isTRUE(show.relative) &
-                                                                     isFALSE(show.cumulative)  &
-                                                                     isFALSE(show.rel.cumulative),
-                                                                   "only.rel.freq",  ifelse(
-                                                                     isFALSE(show.frequencies) &
-                                                                       isFALSE(show.relative) &
-                                                                       isTRUE(show.cumulative) &
-                                                                       isTRUE(show.rel.cumulative),
-                                                                     "only.cumulatives",  ifelse(
-                                                                       isFALSE(show.frequencies) &
-                                                                         isFALSE(show.relative) &
-                                                                         isTRUE(show.cumulative)  &
-                                                                         isFALSE(show.rel.cumulative),
-                                                                       "only.cumulative",  ifelse(
-                                                                         isFALSE(show.frequencies) &
-                                                                           isFALSE(show.relative) &
-                                                                           isFALSE(show.cumulative) &
-                                                                           isTRUE(show.rel.cumulative),
-                                                                         "only.rel.cumulative",  ifelse(
-                                                                           isFALSE(show.frequencies) &
-                                                                             isFALSE(show.relative) &
-                                                                             isFALSE(show.cumulative) &
-                                                                             isFALSE(show.rel.cumulative),
-                                                                           "none", table.type))))))))))))))))
+                                      "none", table.type))))))))))))))))
   ## 1.5 Configure na.counts -----------------------------------------------------
   if (isTRUE(count.na)) {
     use <- "ifany"
@@ -168,28 +168,54 @@ frequencies <- function(x = vector(),
   }
   ## 1.7 Action for numeric and categorical vectors ------------------------------
   if (isTRUE(compare.valids)) {
-    if (var.class %in% c("double", "numeric")) { ## Count NAS
-      freqs.na <-  table(cut(x,
-                             breaks = n.breaks,
-                             right = FALSE, dig.lab = 6,
-                             include.lowest = TRUE),
-                         exclude = FALSE,
-                         useNA = "ifany")
-    } else if (var.class %in% c("factor", "character", "logical", "integer")) {
-      freqs.na <- table(classes = x, exclude = FALSE,
-                        useNA = "ifany")
-    }
-    if (var.class %in% c("double", "numeric")) { ## Exclude NAs
-      freqs <-  table(cut(x,
-                          breaks = n.breaks,
-                          right = FALSE, dig.lab = 6,
-                          include.lowest = TRUE),
-                      exclude = TRUE,
-                      useNA = "no")
-    } else if (var.class %in% c("factor", "character", "logical", "integer")) {
-      freqs <- table(classes = x, exclude = TRUE,
-                     useNA = "no")
-    }
+            if (var.class %in% c("double", "numeric")) { ## Count NAS
+              freqs.na <-  table(cut(x,
+                                     breaks = n.breaks,
+                                     right = FALSE, dig.lab = 6,
+                                     include.lowest = TRUE),
+                                 exclude = FALSE,
+                                 useNA = "ifany")
+            } else if (var.class %in% c("factor", "character", "logical")) {
+              freqs.na <- table(classes = x, exclude = FALSE,
+                                useNA = "ifany")
+            } else if (var.class == "integer") {
+                  n.categories <- length(unique(x))
+                  if (n.categories > 9) {
+                    freqs.na <-  table(cut(x,
+                                           breaks = n.breaks,
+                                           right = FALSE, dig.lab = 6,
+                                           include.lowest = TRUE),
+                                       exclude = FALSE,
+                                       useNA = "ifany")
+                  } else {
+                    freqs.na <- table(classes = x, exclude = FALSE,
+                                      useNA = "ifany")
+                  }
+            }
+            if (var.class %in% c("double", "numeric")) { ## Exclude NAs
+              freqs <-  table(cut(x,
+                                  breaks = n.breaks,
+                                  right = FALSE, dig.lab = 6,
+                                  include.lowest = TRUE),
+                              exclude = TRUE,
+                              useNA = "no")
+            } else if (var.class %in% c("factor", "character", "logical")) {
+              freqs <- table(classes = x, exclude = TRUE,
+                             useNA = "no")
+            } else if (var.class == "integer") { ## Integers could be categorical or continuous
+              n.categories <- length(unique(x))
+                  if (n.categories > 9) {
+                    freqs <-  table(cut(x,
+                                        breaks = n.breaks,
+                                        right = FALSE, dig.lab = 6,
+                                        include.lowest = TRUE),
+                                    exclude = TRUE,
+                                    useNA = "no")
+                  } else {
+                    freqs <- table(classes = x, exclude = TRUE,
+                                   useNA = "no")
+                  }
+            }
   } else {
     if (var.class %in% c("double", "numeric")) {
       freqs <-  table(cut(x,
@@ -198,9 +224,22 @@ frequencies <- function(x = vector(),
                           include.lowest = TRUE),
                       exclude = !count.na,
                       useNA = use)
-    } else if (var.class %in% c("factor", "character", "logical",  "integer")) {
+    } else if (var.class %in% c("factor", "character", "logical")) {
       freqs <- table(classes = x, exclude = !count.na,
                      useNA = use)
+    } else if (var.class == "integer") {
+      n.categories <- length(unique(x))
+      if (n.categories > 9) {
+        freqs <-  table(cut(x,
+                            breaks = n.breaks,
+                            right = FALSE, dig.lab = 6,
+                            include.lowest = TRUE),
+                        exclude = !count.na,
+                        useNA = use)
+      } else {
+        freqs <- table(classes = x, exclude = !count.na,
+                       useNA = use)
+      }
     }
   }
 

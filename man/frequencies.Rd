@@ -30,7 +30,7 @@ frequencies(
 
 \item{use.hist.classes}{for numeric variables, use the default classes for histograms}
 
-\item{count.na}{include NA values as part of the classes to be counted in}
+\item{count.na}{include NA values as part of the classes to be counted}
 
 \item{n.digits}{number of decimal places to display for relative frequencies}
 
