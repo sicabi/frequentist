@@ -202,7 +202,7 @@ frequencies <- function(x = vector(),
               freqs <- table(classes = x, exclude = TRUE,
                              useNA = "no")
             }
-  } else {
+  } else if (isFALSE(compare.valids)) {
     if (var.class %in% c("double", "numeric", "integer")) {
                 n.categories <- length(unique(x))
                 if (n.categories > 9) {
@@ -227,46 +227,62 @@ frequencies <- function(x = vector(),
 
   ## 1.8 Sort from higher to lower or otherwise--------------------------------
   if (isTRUE(compare.valids)) {
-    if (isTRUE(sort.decreasing)) {
-      freqs.na <- sort(freqs.na, decreasing = TRUE)
-      index <- which(is.na(names(freqs.na)))
-      if (length(index) > 0) {
-        size <- length(freqs.na)
-        freqs <- vector(length = size)
-        for (i in 1:size) {
-          if (i < index) {
-            freqs[i] <- freqs.na[i]
-          }  else if(i == index) {
-            freqs[i] <- 0
+    if(sum(is.na(x)) > 0) {
+        if (isTRUE(sort.decreasing)) {
+          freqs.na <- sort(freqs.na, decreasing = TRUE)
+          index <- which(is.na(names(freqs.na)))
+          if (length(index) > 0) {
+            size <- length(freqs.na)
+            freqs <- vector(length = size)
+            for (i in 1:size) {
+              if (i < index) {
+                freqs[i] <- freqs.na[i]
+              }  else if(i == index) {
+                freqs[i] <- 0
+              } else {
+                freqs[i] <- freqs.na[i]
+              }
+            }
           } else {
-            freqs[i] <- freqs.na[i]
+            freqs <- sort(freqs, decreasing = TRUE)
           }
+        } else if (isFALSE(sort.decreasing)) {
+          freqs.na <- sort(freqs.na, decreasing = FALSE)
+          index <- which(is.na(names(freqs.na)))
+          if (length(index) > 0) {
+            size <- length(freqs.na)
+            freqs <- vector(length = size)
+            for (i in 1:size) {
+              if (i < index) {
+                freqs[i] <- freqs.na[i]
+              }  else if(i == index) {
+                freqs[i] <- 0
+              } else {
+                freqs[i] <- freqs.na[i]
+              }
+            }
+          } else {
+            freqs <- sort(freqs, decreasing = FALSE)
+          }
+        } else {
+          freqs <- c(freqs,0)
         }
-      } else {
+    } else if (sum(is.na(x)) == 0) {
+      if (isTRUE(sort.decreasing)) {
+        freqs.na <- sort(freqs.na, decreasing = TRUE)
+        freqs.na <- c(freqs.na,0)
         freqs <- sort(freqs, decreasing = TRUE)
-      }
-    } else if (isFALSE(sort.decreasing)) {
-      freqs.na <- sort(freqs.na, decreasing = FALSE)
-      index <- which(is.na(names(freqs.na)))
-      if (length(index) > 0) {
-        size <- length(freqs.na)
-        freqs <- vector(length = size)
-        for (i in 1:size) {
-          if (i < index) {
-            freqs[i] <- freqs.na[i]
-          }  else if(i == index) {
-            freqs[i] <- 0
-          } else {
-            freqs[i] <- freqs.na[i]
-          }
-        }
-      } else {
+        freqs <- c(freqs,0)
+      } else if (isFALSE(sort.decreasing)) {
+        freqs.na <- sort(freqs.na, decreasing = FALSE)
+        freqs.na <- c(0,freqs.na)
         freqs <- sort(freqs, decreasing = FALSE)
+        freqs <- c(0,freqs)
+      } else {
+        freqs.na <- c(freqs.na,0)
+        freqs <- c(freqs,0)
       }
-    } else if ( sum(is.na(freq.na)) > 0) {
-      freqs <- c(freqs,0)
-    } else 
-      freqs <- freqs.na
+    } 
   } else {
     if (isTRUE(sort.decreasing)) {
       if (isTRUE(count.na)) {
@@ -518,11 +534,13 @@ frequencies <- function(x = vector(),
     freq.table[,2] <- NULL
   }
   ## 1.14 Format classes ---------------------------------------------------------
-  freq.table[,1] <- ifelse(is.na(as.character(freq.table[,1])),
+  freq.table[,1] <- ifelse(is.na(as.character(freq.table[,1])) | 
+                             nchar(as.character(freq.table[,1])) == 0,
                            "NA VALUES",
                            as.character(freq.table[,1]))
   freq.table[,1] <- format(freq.table[,1], justify = "left",
                            na.encode = FALSE)
+  freq.table[,1] <- gsub(pattern = ",", replacement = "-", x = freq.table[,1])
   ## 1.15 Return as data.frame or with Markdown format ---------------------------
   if (isFALSE(as.markdown)) {
     return(freq.table)
