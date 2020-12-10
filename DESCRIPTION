@@ -1,13 +1,13 @@
 Package: frequentist
 Title: Standard Frequency Tables in R 
-Version: 0.0.0.9000
+Version: 0.0.1.0000
 Authors@R: 
     person(given = "José Sicabí",
            family = "Cruz Salinas",
            role = c("aut", "cre"),
            email = "sicabi.cruz@icloud.com", 
            comment = c(date = 12082020))
-Description: R has a variety of methods for tallying counts. However it is difficult to find a method that allows the user to personalize the output into an standard frequency table. This package intends to provide a method for constructing single-variable frequency tables. Future releases will consider two and three-variable tables and even survey frequencies.
+Description: R has a variety of methods for tallying counts. However it is difficult to find a method that allows the user to personalize the output into an standard frequency table. This package intends to provide a method for constructing single-variable frequency tables. Future releases will address two and three-variable tables and even survey frequencies.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
