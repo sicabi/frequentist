@@ -646,12 +646,33 @@ frequencies <- function(x = vector(),
     "NA VALUES",
     as.character(freq.table[, 1])
   )
-  freq.table[, 1] <- format(freq.table[, 1], justify = "left",
-                            na.encode = FALSE)
-  freq.table[, 1] <-
-    gsub(pattern = ",",
-         replacement = "-",
-         x = freq.table[, 1])
+  not.categorical <- !(var.class %in% c("factor", "character", "logical"))
+  continuous <- ((class(airquality$Month) %in% c("double", "numeric", "integer")) & (length(unique(x)) > 9))
+  if ( not.categorical ) {
+    if (continuous) {
+        x <- freq.table[, 1]
+        indices <- which(grepl(pattern = "[[:digit:]]", x = as.character(freq.table[, 1])))
+        y <- x[indices]
+        pattern <- "([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])"
+        proto <- data.frame(limit.type.ll =character(), lower.limit=numeric(), separator = character(),
+                            upper.limit = numeric(), limit.type.ul=character())
+        (limits <- strcapture(pattern, y, proto))
+        
+        index.max <- which.max(sapply(limits[,2], nchar))
+        limits[index.max,2]
+        digits <- nchar(unlist(strsplit(x = as.character(limits[index.max,2]), 
+                                        split = "[.]")))[1]
+        decimals <- nchar(unlist(strsplit(x = as.character(limits[index.max,2]), 
+                                          split = "[.]")))[2]
+        decimals <- ifelse(is.na(decimals), 0, decimals)
+        limits <- format(limits, digits = digits, nsmall = decimals)
+        limits <- do.call(paste0, limits)
+        freq.table[indices, 1] <- limits
+      }
+    }
+    freq.table[, 1] <- format(freq.table[, 1], justify = "left",
+                              na.encode = FALSE)
+ 
   ## 1.15 Return as data.frame or with Markdown format ---------------------------
   if (isFALSE(as.markdown)) {
     return(freq.table)
