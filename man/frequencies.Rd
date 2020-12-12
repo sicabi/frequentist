@@ -18,37 +18,40 @@ frequencies(
   show.cumulative = TRUE,
   show.rel.cumulative = TRUE,
   show.frequencies = TRUE,
-  compare.valids = FALSE
+  compare.valids = FALSE,
+  x.as.categorical = FALSE
 )
 }
 \arguments{
-\item{x}{a numeric or categorical variable}
+\item{x}{vector. a numeric or categorical variable}
 
-\item{n.classes}{the number of classes for the numeric variable}
+\item{n.classes}{numeric. the number of classes for the numeric variable}
 
-\item{sort.decreasing}{sort frequencies decreasingly}
+\item{sort.decreasing}{NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.}
 
-\item{use.hist.classes}{for numeric variables, use the default classes for histograms}
+\item{use.hist.classes}{logical. uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram.}
 
-\item{count.na}{include NA values as part of the classes to be counted}
+\item{count.na}{logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected-}
 
-\item{n.digits}{number of decimal places to display for relative frequencies}
+\item{n.digits}{integer. number of decimal places to display for percentage frequencies. The number of decimals shown for relative frequencies will be digits + 2.}
 
-\item{show.totals}{show the sum of frequencies}
+\item{show.totals}{logical. Show the sum of frequencies and relative/percentage frequencies.}
 
-\item{show.percent}{show relative frequencies as percentages}
+\item{show.percent}{logical. show relative frequencies as percentage frequencies.}
 
-\item{as.markdown}{return the frequency in RMarkdown format}
+\item{as.markdown}{logical. Return the frequency table in RMarkdown format, uses the pander:: package.}
 
-\item{show.relative}{show the column for relative frequencies}
+\item{show.relative}{logical. Show or hide the column for relative frequencies, default is TRUE.}
 
-\item{show.cumulative}{show the column for cumulative frequencies}
+\item{show.cumulative}{logical. Show or hide the column for cumulative frequencies, default is TRUE.}
 
-\item{show.rel.cumulative}{show the column for relative cumulative frequencies}
+\item{show.rel.cumulative}{logical. Show or hide the column for relative cumulative frequencies, default is TRUE.}
 
-\item{show.frequencies}{show counts per class}
+\item{show.frequencies}{logical. Show or hide the counts per class, default is TRUE.}
 
-\item{compare.valids}{show an additional column for each column type to compare valid vs. NA values. It overrides na.count}
+\item{compare.valids}{logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.}
+
+\item{x.as.categorical}{logical. Force the presentation of a continuous variable as a categorical one.}
 }
 \value{
 a data.frame with one character column and the rest as numeric values
