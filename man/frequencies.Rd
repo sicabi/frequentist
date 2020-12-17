@@ -19,7 +19,8 @@ frequencies(
   show.rel.cumulative = TRUE,
   show.frequencies = TRUE,
   compare.valids = FALSE,
-  x.as.categorical = FALSE
+  x.as.categorical = FALSE,
+  svy.design = NULL
 )
 }
 \arguments{
@@ -52,6 +53,8 @@ frequencies(
 \item{compare.valids}{logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.}
 
 \item{x.as.categorical}{logical. Force the presentation of a continuous variable as a categorical one.}
+
+\item{svy.design}{survey.design object. Survey design from survey:: package}
 }
 \value{
 a data.frame with one character column and the rest as numeric values

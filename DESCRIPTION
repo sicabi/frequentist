@@ -18,4 +18,5 @@ Imports:
     graphics,
     utils,
     magrittr,
-    pander
+    pander,
+    survey
