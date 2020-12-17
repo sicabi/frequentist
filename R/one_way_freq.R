@@ -196,14 +196,14 @@ one.way.freq <- function(x = vector(),
       if (n.classes >= 1) {
         if (n.classes != nclass.Sturges(x)) {
           n.breaks <- seq(
-            from = round(min(x, na.rm = TRUE), 0),
-            to = round(max(x, na.rm = TRUE), 0),
+            from = min(x, na.rm = TRUE),
+            to = max(x, na.rm = TRUE),
             length = n.classes + 1
           )
         } else {
           n.breaks <- seq(
-            from = round(min(x, na.rm = TRUE), 0),
-            to = round(max(x, na.rm = TRUE), 0),
+            from = min(x, na.rm = TRUE),
+            to = max(x, na.rm = TRUE),
             length = n.classes
           )
         }
