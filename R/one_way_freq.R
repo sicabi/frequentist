@@ -22,23 +22,23 @@
 #' @export
 #'
 #' @examples
-#' frequencies(x = airquality$Ozone)
-frequencies <- function(x = vector(),
-                        n.classes = nclass.Sturges(x),
-                        sort.decreasing = NULL,
-                        use.hist.classes = FALSE,
-                        count.na = TRUE,
-                        n.digits = 2,
-                        show.totals = TRUE,
-                        show.percent = FALSE,
-                        as.markdown = FALSE,
-                        show.relative = TRUE,
-                        show.cumulative = TRUE,
-                        show.rel.cumulative = TRUE,
-                        show.frequencies = TRUE,
-                        compare.valids = FALSE,
-                        x.as.categorical = FALSE,
-                        svy.design = NULL) {
+#' one.way.freq(x = airquality$Ozone)
+one.way.freq <- function(x = vector(),
+                         n.classes = nclass.Sturges(x),
+                         sort.decreasing = NULL,
+                         use.hist.classes = FALSE,
+                         count.na = TRUE,
+                         n.digits = 2,
+                         show.totals = TRUE,
+                         show.percent = FALSE,
+                         as.markdown = FALSE,
+                         show.relative = TRUE,
+                         show.cumulative = TRUE,
+                         show.rel.cumulative = TRUE,
+                         show.frequencies = TRUE,
+                         compare.valids = FALSE,
+                         x.as.categorical = FALSE,
+                         svy.design = NULL) {
   ## 1.2 Validate arguments ----------------------------------------------------
   stopifnot({
     is.vector(x)
@@ -745,7 +745,7 @@ frequencies <- function(x = vector(),
   ## Save table with variable name
   #freq.table <- list(freq.table)
   #names(freq.table)[1] <- sub(pattern = ".*\\$", "", x= deparse(substitute(x)))
-    ## 1.15 Return as data.frame or with Markdown format ---------------------------
+  ## 1.15 Return as data.frame or with Markdown format ---------------------------
   options(scipen = 9)
   if (isFALSE(as.markdown)) {
     return(freq.table)
