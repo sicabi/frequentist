@@ -6,7 +6,7 @@
 \usage{
 frequencies(
   x = vector(),
-  n.classes = nclass.Sturges(x),
+  n.classes = grDevices::nclass.Sturges(x),
   na.count = TRUE,
   n.digits = 2,
   show.totals = TRUE,

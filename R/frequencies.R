@@ -25,7 +25,7 @@
 #' @examples
 #' frequencies(x = airquality$Ozone)
 frequencies <- function(x = vector(),
-                        n.classes = nclass.Sturges(x),
+                        n.classes = grDevices::nclass.Sturges(x),
                         na.count = TRUE,
                         n.digits = 2,
                         show.totals = TRUE,
@@ -197,7 +197,7 @@ frequencies <- function(x = vector(),
   ## 1.6 Configure n.breaks ----------------------------------------------------
   if (inherits(x, c("double", "numeric", "integer"))) {
     if (isTRUE(tidy.breaks)) {
-      n.breaks <- hist(x, plot = FALSE)$breaks
+      n.breaks <- graphics::hist(x, plot = FALSE)$breaks
     } else if (length(n.classes) == 1) {
       if (n.classes >= 1) {
         if (n.classes != nclass.Sturges(x)) {
@@ -268,7 +268,7 @@ frequencies <- function(x = vector(),
                         useNA = "ifany")
     } else if (isTRUE(inherits(svy.design, 
                                c("survey.design2", "survey.design", "svyrep.design")))) {
-      freqs.na <- svytable(as.formula( paste0( "~" , x)),
+      freqs.na <- survey::svytable(stats::as.formula( paste0( "~" , x)),
                            design = svy.design, round = TRUE)
     } 
     if (inherits(x, c("double", "numeric", "integer"))  &
@@ -309,7 +309,7 @@ frequencies <- function(x = vector(),
       
     } else if (inherits(svy.design, 
                         c("survey.design2", "survey.design", "svyrep.design"))) {
-      freqs <- survey::svytable(as.formula( paste0( "~" , x)),
+      freqs <- survey::svytable(stats::as.formula( paste0( "~" , x)),
                                 design = svy.design, round = TRUE)
     }
   } else if (isFALSE(compare.valids)) {
@@ -351,7 +351,7 @@ frequencies <- function(x = vector(),
                      useNA = use)
     } else if (inherits(svy.design,
                         c("survey.design2", "survey.design", "svyrep.design"))) {
-      freqs <- survey::svytable(as.formula( paste0("~", x)),design = svy.design, 
+      freqs <- survey::svytable(stats::as.formula( paste0("~", x)),design = svy.design, 
                                 round = TRUE)
     }
   }
@@ -728,6 +728,7 @@ frequencies <- function(x = vector(),
     freq.table[, 2] <- NULL
   }
   ## 1.14 Format classes -------------------------------------------------------
+  n.categories <- length(unique(x))
   freq.table[, 1] <- ifelse(
     is.na(as.character(freq.table[, 1])) |
       nchar(as.character(freq.table[, 1])) == 0,
@@ -740,7 +741,7 @@ frequencies <- function(x = vector(),
     ((
       inherits(x, c("double", "numeric","integer"))
     ) & 
-      (length(unique(x)) > 15))
+      (n.categories > 51))
   if (not.categorical) {
     if (continuous) {
       a <- freq.table[, 1]
@@ -757,7 +758,7 @@ frequencies <- function(x = vector(),
           upper.limit = numeric(),
           limit.type.ul = character()
         )
-      (limits <- strcapture(pattern, b, proto))
+      (limits <- utils::strcapture(pattern, b, proto))
       index.max <- which.max(sapply(limits[, 2], nchar))
       limits[index.max, 2]
       digits <-
