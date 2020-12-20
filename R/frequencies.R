@@ -1,27 +1,25 @@
 # 1. Define function name and its arguments -----------------------------------
 #'  Standard Frequency Tables in R
 #'
-#' @param x Vector. A numeric or categorical variable
+#' @param x Vector. A numeric or categorical variable of any type.
 #' @param n.classes Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will 
-#' @param sort.decreasing NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.
-#' @param tidy.breaks Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.
-#' @param time.breaks Character or integer. Specifies the aggregation class for date-time vaiables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.
-#' @param na.count Logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected-
+#' @param na.count Logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected.
 #' @param n.digits Integer. number of decimal places to display for percentage frequencies. The number of decimals shown for relative frequencies is n.digits + 2.
 #' @param show.totals Logical. Show the sum of frequencies and relative/percentage frequencies.
+#' @param sort.decreasing NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.
+#' @param svy.design survey.design object. A survey design object from survey::package.
+#' @param time.breaks Character or integer. Specifies the aggregation class for date-time vaiables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.
+#' @param tidy.breaks Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.
 #' @param show.percent Logical. show relative frequencies as percentage frequencies.
 #' @param as.markdown Logical. Return the frequency table in RMarkdown format, uses the pander:: package.
+#' @param as.categorical Logical. If TRUE, it will display each integer value as a different category. If FALSE, it will aggregate integer values into classes for unique values greater than 15. Useful for displaying variables with several categories, such as  Default is FALSE.
+#' @param compare.valids Logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.
 #' @param show.relative Logical. Show or hide the column for relative frequencies, default is TRUE.
 #' @param show.cumulative Logical. Show or hide the column for cumulative frequencies, default is FALSE
 #' @param show.rel.cumulative Logical. Show or hide the column for relative cumulative frequencies, default is FALSE.
 #' @param show.frequencies Logical. Show or hide the column for counts per class, default is TRUE.
-#' @param compare.valids Logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.
-#' @param as.categorical Logical. If TRUE, it will display each integer value as a different category. If FALSE, it will aggregate integer values into classes for unique values greater than 15. Useful for displaying variables with several categories, such as  Default is FALSE.
-#' @param svy.design survey.design object. Survey design from survey:: package
-#' 
 #' @return a data.frame with one character column and the rest as numeric values
 #' @export
-#'
 #' @examples
 #' frequencies(x = airquality$Ozone)
 frequencies <- function(x = vector(),
@@ -30,17 +28,18 @@ frequencies <- function(x = vector(),
                         n.digits = 2,
                         show.totals = TRUE,
                         sort.decreasing = NULL,
-                        tidy.breaks = FALSE,
+                        svy.design = NULL,
                         time.breaks = NULL,
+                        tidy.breaks = FALSE,
                         show.percent = FALSE,
                         as.markdown = FALSE,
+                        as.categorical = FALSE,
+                        compare.valids = FALSE,
                         show.relative = TRUE,
                         show.cumulative = FALSE,
                         show.rel.cumulative = FALSE,
-                        show.frequencies = TRUE,
-                        compare.valids = FALSE,
-                        as.categorical = FALSE,
-                        svy.design = NULL) {
+                        show.frequencies = TRUE
+                        ) {
   ## 1.2 Validate arguments ----------------------------------------------------
   stopifnot({
     is.vector(x)
@@ -232,9 +231,9 @@ frequencies <- function(x = vector(),
   } 
   ## 1.7 Action for numeric and categorical vectors ----------------------------
   if (isTRUE(compare.valids)) {
+    ## Count NAs for compare.valids = TRUE case
     if (inherits(x, c("double", "numeric", "integer")) &
         is.null(svy.design)) {
-      ## Count NAS
       n.categories <- length(unique(x))
       if (n.categories > 51) {
         freqs.na <-  table(
@@ -270,10 +269,16 @@ frequencies <- function(x = vector(),
                                c("survey.design2", "survey.design", "svyrep.design")))) {
       freqs.na <- survey::svytable(stats::as.formula( paste0( "~" , x)),
                            design = svy.design, round = TRUE)
-    } 
+    } else {
+        freqs.na <- table(
+          classes = x,
+          exclude = FALSE,
+          useNA = "ifany"
+        )
+    }
+    ## Exclude NAs for compare.valids = TRUE case
     if (inherits(x, c("double", "numeric", "integer"))  &
         is.null(svy.design)) {
-      ## Exclude NAs
       n.categories <- length(unique(x))
       if (n.categories > 51) {
         freqs <-  table(
@@ -311,7 +316,13 @@ frequencies <- function(x = vector(),
                         c("survey.design2", "survey.design", "svyrep.design"))) {
       freqs <- survey::svytable(stats::as.formula( paste0( "~" , x)),
                                 design = svy.design, round = TRUE)
-    }
+    } else {
+        freqs <- table(
+          classes = x,
+          exclude = TRUE,
+          useNA = "no"
+        )
+    } # Compare valids as FALSE
   } else if (isFALSE(compare.valids)) {
     if (inherits(x, c("double", "numeric", "integer"))  &
         is.null(svy.design)) {
@@ -353,6 +364,12 @@ frequencies <- function(x = vector(),
                         c("survey.design2", "survey.design", "svyrep.design"))) {
       freqs <- survey::svytable(stats::as.formula( paste0("~", x)),design = svy.design, 
                                 round = TRUE)
+    } else {
+      freqs <- table(
+        classes = x,
+        exclude = !na.count,
+        useNA = use
+      )
     }
   }
   ## 1.8 Sort from higher to lower or otherwise--------------------------------
@@ -450,7 +467,7 @@ frequencies <- function(x = vector(),
   }
   ## 1.9 Function to define which columns to add -------------------------------
   if (isTRUE(compare.valids)) {
-    counts.table <- function(freqs, freqs.na, type) {
+    counts.table.na <- function(freqs, freqs.na, type) {
       switch(
         type,
         none = cbind(freqs.n = freqs.na),
@@ -667,7 +684,7 @@ frequencies <- function(x = vector(),
   if (isFALSE(compare.valids)) {
     freq.table <- counts.table(freqs, type = table.type)
   } else {
-    freq.table <- counts.table(freqs, freqs.na, type = table.type)
+    freq.table <- counts.table.na(freqs, freqs.na, type = table.type)
   }
   ## 1.11 Show totals or not
   if (isTRUE(show.totals)) {

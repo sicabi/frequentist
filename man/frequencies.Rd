@@ -11,25 +11,25 @@ frequencies(
   n.digits = 2,
   show.totals = TRUE,
   sort.decreasing = NULL,
-  tidy.breaks = FALSE,
+  svy.design = NULL,
   time.breaks = NULL,
+  tidy.breaks = FALSE,
   show.percent = FALSE,
   as.markdown = FALSE,
+  as.categorical = FALSE,
+  compare.valids = FALSE,
   show.relative = TRUE,
   show.cumulative = FALSE,
   show.rel.cumulative = FALSE,
-  show.frequencies = TRUE,
-  compare.valids = FALSE,
-  as.categorical = FALSE,
-  svy.design = NULL
+  show.frequencies = TRUE
 )
 }
 \arguments{
-\item{x}{Vector. A numeric or categorical variable}
+\item{x}{Vector. A numeric or categorical variable of any type.}
 
 \item{n.classes}{Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will}
 
-\item{na.count}{Logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected-}
+\item{na.count}{Logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected.}
 
 \item{n.digits}{Integer. number of decimal places to display for percentage frequencies. The number of decimals shown for relative frequencies is n.digits + 2.}
 
@@ -37,13 +37,19 @@ frequencies(
 
 \item{sort.decreasing}{NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.}
 
-\item{tidy.breaks}{Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.}
+\item{svy.design}{survey.design object. A survey design object from survey::package.}
 
 \item{time.breaks}{Character or integer. Specifies the aggregation class for date-time vaiables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.}
+
+\item{tidy.breaks}{Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.}
 
 \item{show.percent}{Logical. show relative frequencies as percentage frequencies.}
 
 \item{as.markdown}{Logical. Return the frequency table in RMarkdown format, uses the pander:: package.}
+
+\item{as.categorical}{Logical. If TRUE, it will display each integer value as a different category. If FALSE, it will aggregate integer values into classes for unique values greater than 15. Useful for displaying variables with several categories, such as  Default is FALSE.}
+
+\item{compare.valids}{Logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.}
 
 \item{show.relative}{Logical. Show or hide the column for relative frequencies, default is TRUE.}
 
@@ -52,12 +58,6 @@ frequencies(
 \item{show.rel.cumulative}{Logical. Show or hide the column for relative cumulative frequencies, default is FALSE.}
 
 \item{show.frequencies}{Logical. Show or hide the column for counts per class, default is TRUE.}
-
-\item{compare.valids}{Logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.}
-
-\item{as.categorical}{Logical. If TRUE, it will display each integer value as a different category. If FALSE, it will aggregate integer values into classes for unique values greater than 15. Useful for displaying variables with several categories, such as  Default is FALSE.}
-
-\item{svy.design}{survey.design object. Survey design from survey:: package}
 }
 \value{
 a data.frame with one character column and the rest as numeric values
