@@ -6,7 +6,9 @@
 \usage{
 frequencies(
   x = vector(),
-  n.classes = grDevices::nclass.Sturges(x),
+  n.classes = NULL,
+  lower.limit = NULL,
+  upper.limit = NULL,
   na.count = TRUE,
   n.digits = 2,
   show.totals = TRUE,
@@ -14,7 +16,7 @@ frequencies(
   svy.design = NULL,
   time.breaks = NULL,
   tidy.breaks = FALSE,
-  show.percent = FALSE,
+  show.percent = TRUE,
   as.markdown = FALSE,
   as.categorical = FALSE,
   compare.valids = FALSE,
@@ -27,7 +29,11 @@ frequencies(
 \arguments{
 \item{x}{Vector. A numeric or categorical variable of any type.}
 
-\item{n.classes}{Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will}
+\item{n.classes}{Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will represent the desired break points for the classes. Defaults to the number of classes determined by the Herbert Sturges algorithm.}
+
+\item{lower.limit}{Numeric. Lower classes limit. Along with n.classes, it determines the bins of a distribution for continuous variables. Defaults to the minimum value of the numeric vector.}
+
+\item{upper.limit}{Numeric. Lower classes limit. Along with n.classes, it determines the bins of a distribution for continuous variables. Defaults to the maximum value of the numeric vector.}
 
 \item{na.count}{Logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected.}
 
@@ -43,7 +49,7 @@ frequencies(
 
 \item{tidy.breaks}{Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.}
 
-\item{show.percent}{Logical. show relative frequencies as percentage frequencies.}
+\item{show.percent}{Logical. show relative frequencies as percentage frequencies. Default is TRUE.}
 
 \item{as.markdown}{Logical. Return the frequency table in RMarkdown format, uses the pander:: package.}
 
