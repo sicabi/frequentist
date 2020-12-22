@@ -2,6 +2,7 @@
 #'  Standard Frequency Tables in R
 #'
 #' @param x Vector. A numeric or categorical variable of any type.
+#' @param weights Numeric. Weights for aggregating the categories in x. It should have the same length of x.
 #' @param n.classes Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will represent the desired break points for the classes. Defaults to the number of classes determined by the Herbert Sturges algorithm.
 #' @param lower.limit Numeric. Lower classes limit. Along with n.classes, it determines the bins of a distribution for continuous variables. Defaults to the minimum value of the numeric vector.
 #' @param upper.limit Numeric. Lower classes limit. Along with n.classes, it determines the bins of a distribution for continuous variables. Defaults to the maximum value of the numeric vector.
@@ -25,6 +26,7 @@
 #' @examples
 #' frequencies(x = airquality$Ozone)
 frequencies <- function(x = vector(),
+                        weights = NULL,
                         n.classes = NULL,
                         lower.limit = NULL,
                         upper.limit = NULL,
@@ -47,6 +49,7 @@ frequencies <- function(x = vector(),
   ## 1.2 Validate arguments ----------------------------------------------------
   stopifnot({
     is.vector(x)
+    is.null(weights) | is.numeric(weights)
     is.null(n.classes)   | is.numeric(n.classes)
     is.null(lower.limit) | is.numeric(lower.limit)
     is.null(upper.limit) | is.numeric(upper.limit) 
@@ -283,14 +286,21 @@ frequencies <- function(x = vector(),
       }
     } else if (inherits(x, c("factor", "character", "logical")) &
                is.null(svy.design)) {
-      freqs <- table(classes = x,
-                     exclude = TRUE,
-                     useNA = "no")
-      freqs <- c(freqs, "NA VALUES" = 0)
-      freqs.na <- table(classes = x,
-                        exclude = TRUE,
-                        useNA = "no")
-      freqs.na <- c(freqs.na, na.values)
+      if (is.null(weights)) {
+            freqs <- table(classes = x,
+                           exclude = TRUE,
+                           useNA = "no")
+            freqs <- c(freqs, "NA VALUES" = 0)
+            freqs.na <- table(classes = x,
+                              exclude = TRUE,
+                              useNA = "no")
+            freqs.na <- c(freqs.na, na.values)
+      } else if (is.numeric(weights)) {
+            freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+            freqs <- c(freqs, "NA VALUES" = 0)
+            freqs.na <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+            freqs.na <- c(freqs.na, na.values)
+      }
     } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
                is.null(svy.design)) {
       x <- as.POSIXct(x)
@@ -353,9 +363,13 @@ frequencies <- function(x = vector(),
       }
     } else if (inherits(x, c("factor", "character", "logical")) &
                is.null(svy.design)) {
-      freqs <- table(classes = x,
-                     exclude = !na.count,
-                     useNA = use)
+      if (is.null(weights)) {
+          freqs <- table(classes = x,
+                         exclude = !na.count,
+                         useNA =use)
+      } else if (is.numeric(weights)) {
+          freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+      }
     } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
                is.null(svy.design)) {
       x <- as.POSIXct(x)
@@ -728,10 +742,7 @@ frequencies <- function(x = vector(),
   }
   freq.table[, 1] <- format(freq.table[, 1], justify = "left",
                             na.encode = FALSE)
-  ## Save table with variable name
-  #freq.table <- list(freq.table)
-  #names(freq.table)[1] <- sub(pattern = ".*\\$", "", x= deparse(substitute(x)))
-  ## 1.15 Return as data.frame or with Markdown format -------------------------
+   ## 1.15 Return as data.frame or with Markdown format -------------------------
   options(scipen = 9)
   if (isFALSE(as.markdown)) {
     return(freq.table)

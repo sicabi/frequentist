@@ -6,6 +6,7 @@
 \usage{
 frequencies(
   x = vector(),
+  weights = NULL,
   n.classes = NULL,
   lower.limit = NULL,
   upper.limit = NULL,
@@ -28,6 +29,8 @@ frequencies(
 }
 \arguments{
 \item{x}{Vector. A numeric or categorical variable of any type.}
+
+\item{weights}{Numeric. Weights for aggregating the categories in x. It should have the same length of x.}
 
 \item{n.classes}{Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will represent the desired break points for the classes. Defaults to the number of classes determined by the Herbert Sturges algorithm.}
 
