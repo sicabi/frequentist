@@ -19,4 +19,5 @@ Imports:
     utils,
     magrittr,
     pander,
-    survey
+    survey,
+    withr

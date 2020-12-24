@@ -5,7 +5,7 @@
 \title{Standard Frequency Tables in R}
 \usage{
 frequencies(
-  x = vector(),
+  x = NULL,
   weights = NULL,
   n.classes = NULL,
   lower.limit = NULL,
@@ -18,6 +18,7 @@ frequencies(
   time.breaks = NULL,
   tidy.breaks = FALSE,
   show.percent = TRUE,
+  thousands.mark = FALSE,
   as.markdown = FALSE,
   as.categorical = FALSE,
   compare.valids = FALSE,
@@ -28,7 +29,7 @@ frequencies(
 )
 }
 \arguments{
-\item{x}{Vector. A numeric or categorical variable of any type.}
+\item{x}{Vector or data.frane. A numeric or categorical variable of any type.}
 
 \item{weights}{Numeric. Weights for aggregating the categories in x. It should have the same length of x.}
 
@@ -52,7 +53,9 @@ frequencies(
 
 \item{tidy.breaks}{Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.}
 
-\item{show.percent}{Logical. show relative frequencies as percentage frequencies. Default is TRUE.}
+\item{show.percent}{Logical. Show relative frequencies as percentage frequencies. Default is TRUE.}
+
+\item{thousands.mark}{Logical. Show the thousands mark for numeric columns. Warning: numeric variables are stored as character.}
 
 \item{as.markdown}{Logical. Return the frequency table in RMarkdown format, uses the pander:: package.}
 
