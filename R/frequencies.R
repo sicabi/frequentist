@@ -14,7 +14,7 @@
 #' @param time.breaks Character or integer. Specifies the aggregation class for date-time vaiables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.
 #' @param tidy.breaks Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.
 #' @param show.percent Logical. Show relative frequencies as percentage frequencies. Default is TRUE.
-#' @param thousands.mark Logical. Show the thousands mark for numeric columns. Warning: numeric variables are stored as character. 
+#' @param use.thousands.mark Logical. Show the thousands mark for numeric columns. Warning: numeric variables will be stored as character. 
 #' @param as.markdown Logical. Return the frequency table in RMarkdown format, uses the pander:: package.
 #' @param as.categorical Logical. If TRUE, it will display each integer value as a different category. If FALSE, it will aggregate integer values into classes for unique values greater than 15. Useful for displaying variables with several categories, such as  Default is FALSE.
 #' @param compare.valids Logical. Show or hide an additional column for each column type to compare valid vs. NA values, default is FALSE. It overrides selected option for na.count argument.
@@ -41,7 +41,7 @@
                         time.breaks = NULL,
                         tidy.breaks = FALSE,
                         show.percent = TRUE,
-                        thousands.mark = FALSE,
+                        use.thousands.mark = FALSE,
                         as.markdown = FALSE,
                         as.categorical = FALSE,
                         compare.valids = FALSE,
@@ -50,135 +50,136 @@
                         show.rel.cumulative = FALSE,
                         show.frequencies = TRUE) {
     workhorse <- function(x,...) {
-    stopifnot({
-      is.null(x) | is.vector(x) |  is.data.frame(x)
-      is.null(weights) | is.numeric(weights)
-      is.null(n.classes)   | is.numeric(n.classes)
-      is.null(lower.limit) | is.numeric(lower.limit)
-      is.null(upper.limit) | is.numeric(upper.limit) 
-      is.logical(sort.decreasing) | is.null(sort.decreasing)
-      is.logical(tidy.breaks)
-      is.logical(na.count)
-      is.integer(n.digits)
-      is.logical(show.totals)
-      is.logical(show.percent)
-      is.logical(thousands.mark)
-      is.logical(show.relative)
-      is.logical(show.cumulative)
-      is.logical(show.rel.cumulative)
-      is.logical(show.frequencies)
-      is.logical(as.markdown)
-      is.logical(as.categorical)
-      is.null(svy.design) | isTRUE(inherits(svy.design, c("survey.design2", 
-                                                          "survey.design", 
-                                                          "svyrep.design")))
-      is.null(time.breaks) | (is.numeric(time.breaks) & 
-                                length(time.breaks) == 1L) | 
-        inherits(time.breaks, c("POSIXt", "POSIXct", "POSIXlt", "Date")) | 
-        (time.breaks %in% c("secs", "mins", "hours", "days", "weeks", "months",
-                            "years", "DSTdays", "quarters") & 
-           length(time.breaks) == 1L)
-    })  
-      ## 1.3 Define frequency table types --------------------------------------------
-      table.type = character()
-      table.type <-
-        ifelse(
-          isTRUE(show.frequencies) &
-            isTRUE(show.relative) &
-            isTRUE(show.cumulative) &
-            isTRUE(show.rel.cumulative),
-          "all",
+      stopifnot({
+        is.null(x) | is.vector(x) |  is.data.frame(x)
+        is.null(weights) | is.numeric(weights)
+        is.null(n.classes)   | is.numeric(n.classes)
+        is.null(lower.limit) | is.numeric(lower.limit)
+        is.null(upper.limit) | is.numeric(upper.limit) 
+        is.logical(sort.decreasing) | is.null(sort.decreasing)
+        is.logical(tidy.breaks)
+        is.logical(na.count)
+        is.integer(n.digits)
+        is.logical(show.totals)
+        is.logical(show.percent)
+        is.logical(use.thousands.mark)
+        is.logical(show.relative)
+        is.logical(show.cumulative)
+        is.logical(show.rel.cumulative)
+        is.logical(show.frequencies)
+        is.logical(as.markdown)
+        is.logical(as.categorical)
+        is.null(svy.design) | isTRUE(inherits(svy.design, c("survey.design2", 
+                                                            "survey.design", 
+                                                            "svyrep.design")))
+        is.null(time.breaks) | (is.numeric(time.breaks) & 
+                                  length(time.breaks) == 1L) | 
+          inherits(time.breaks, c("POSIXt", "POSIXct", "POSIXlt", "Date")) | 
+          (time.breaks %in% c("secs", "mins", "hours", "days", "weeks", "months",
+                              "years", "DSTdays", "quarters") & 
+             length(time.breaks) == 1L)
+      })  
+        ## 1.3 Define frequency table types --------------------------------------------
+        table.type = character()
+        table.type <-
           ifelse(
             isTRUE(show.frequencies) &
-              isFALSE(show.relative) &
-              isFALSE(show.cumulative) &
-              isFALSE(show.rel.cumulative),
-            "only.freqs",
+              isTRUE(show.relative) &
+              isTRUE(show.cumulative) &
+              isTRUE(show.rel.cumulative),
+            "all",
             ifelse(
               isTRUE(show.frequencies) &
-                isTRUE(show.relative) &
+                isFALSE(show.relative) &
                 isFALSE(show.cumulative) &
                 isFALSE(show.rel.cumulative),
-              "freqs.and.relative",
+              "only.freqs",
               ifelse(
                 isTRUE(show.frequencies) &
-                  isFALSE(show.relative) &
-                  isTRUE(show.cumulative) &
+                  isTRUE(show.relative) &
+                  isFALSE(show.cumulative) &
                   isFALSE(show.rel.cumulative),
-                "freqs.and.cumulative",
+                "freqs.and.relative",
                 ifelse(
                   isTRUE(show.frequencies) &
-                    isTRUE(show.relative) &
+                    isFALSE(show.relative) &
                     isTRUE(show.cumulative) &
                     isFALSE(show.rel.cumulative),
-                  "freqs.relative.and.cumulative",
+                  "freqs.and.cumulative",
                   ifelse(
                     isTRUE(show.frequencies) &
                       isTRUE(show.relative) &
-                      isFALSE(show.cumulative) &
-                      isTRUE(show.rel.cumulative),
-                    "freqs.and.relatives",
+                      isTRUE(show.cumulative) &
+                      isFALSE(show.rel.cumulative),
+                    "freqs.relative.and.cumulative",
                     ifelse(
                       isTRUE(show.frequencies) &
-                        isFALSE(show.relative) &
-                        isTRUE(show.cumulative) &
+                        isTRUE(show.relative) &
+                        isFALSE(show.cumulative) &
                         isTRUE(show.rel.cumulative),
-                      "freqs.and.cumulatives",
+                      "freqs.and.relatives",
                       ifelse(
                         isTRUE(show.frequencies) &
                           isFALSE(show.relative) &
-                          isFALSE(show.cumulative) &
+                          isTRUE(show.cumulative) &
                           isTRUE(show.rel.cumulative),
-                        "freqs.and.rel.cumulative",
+                        "freqs.and.cumulatives",
                         ifelse(
-                          isFALSE(show.frequencies) &
-                            isTRUE(show.relative) &
-                            isTRUE(show.cumulative) &
+                          isTRUE(show.frequencies) &
+                            isFALSE(show.relative) &
+                            isFALSE(show.cumulative) &
                             isTRUE(show.rel.cumulative),
-                          "relative.and.cumulatives",
+                          "freqs.and.rel.cumulative",
                           ifelse(
                             isFALSE(show.frequencies) &
                               isTRUE(show.relative) &
                               isTRUE(show.cumulative) &
-                              isFALSE(show.rel.cumulative),
-                            "relative.and.cumulative",
+                              isTRUE(show.rel.cumulative),
+                            "relative.and.cumulatives",
                             ifelse(
                               isFALSE(show.frequencies) &
                                 isTRUE(show.relative) &
-                                isFALSE(show.cumulative)  &
-                                isTRUE(show.rel.cumulative),
-                              "only.relatives",
+                                isTRUE(show.cumulative) &
+                                isFALSE(show.rel.cumulative),
+                              "relative.and.cumulative",
                               ifelse(
                                 isFALSE(show.frequencies) &
                                   isTRUE(show.relative) &
                                   isFALSE(show.cumulative)  &
-                                  isFALSE(show.rel.cumulative),
-                                "only.rel.freq",
+                                  isTRUE(show.rel.cumulative),
+                                "only.relatives",
                                 ifelse(
                                   isFALSE(show.frequencies) &
-                                    isFALSE(show.relative) &
-                                    isTRUE(show.cumulative) &
-                                    isTRUE(show.rel.cumulative),
-                                  "only.cumulatives",
+                                    isTRUE(show.relative) &
+                                    isFALSE(show.cumulative)  &
+                                    isFALSE(show.rel.cumulative),
+                                  "only.rel.freq",
                                   ifelse(
                                     isFALSE(show.frequencies) &
                                       isFALSE(show.relative) &
-                                      isTRUE(show.cumulative)  &
-                                      isFALSE(show.rel.cumulative),
-                                    "only.cumulative",
+                                      isTRUE(show.cumulative) &
+                                      isTRUE(show.rel.cumulative),
+                                    "only.cumulatives",
                                     ifelse(
                                       isFALSE(show.frequencies) &
                                         isFALSE(show.relative) &
-                                        isFALSE(show.cumulative) &
-                                        isTRUE(show.rel.cumulative),
-                                      "only.rel.cumulative",
+                                        isTRUE(show.cumulative)  &
+                                        isFALSE(show.rel.cumulative),
+                                      "only.cumulative",
                                       ifelse(
                                         isFALSE(show.frequencies) &
                                           isFALSE(show.relative) &
                                           isFALSE(show.cumulative) &
-                                          isFALSE(show.rel.cumulative),
-                                        "none",
-                                        table.type
+                                          isTRUE(show.rel.cumulative),
+                                        "only.rel.cumulative",
+                                        ifelse(
+                                          isFALSE(show.frequencies) &
+                                            isFALSE(show.relative) &
+                                            isFALSE(show.cumulative) &
+                                            isFALSE(show.rel.cumulative),
+                                          "none",
+                                          table.type
+                                        )
                                       )
                                     )
                                   )
@@ -194,89 +195,136 @@
               )
             )
           )
-        )
-      ## 1.5 Configure na.counts ---------------------------------------------------
-      if (isTRUE(na.count)) {
-        use <- "ifany"
-      } else {
-        use <- "no"
-      }
-      na.counts <- sum(is.na(x))
-      ## 1.6 Configure numeric as categoricals
-      if (inherits(x, c("double", "numeric", "integer")) & isTRUE(as.categorical)) {
-        x <- as.factor(x)
-      }
-      ## Configure from and to values
-      if (inherits(x, c("double", "numeric", "integer"))) {
-        if (is.null(lower.limit)) {
-          lower.limit <- min(x, na.rm = TRUE)
+        ## 1.5 Configure na.counts ---------------------------------------------------
+        if (isTRUE(na.count)) {
+          use <- "always"
+        } else {
+          use <- "no"
         }
-        if (is.null(upper.limit)) {
-          upper.limit <- max(x, na.rm = TRUE)
+        na.counts <- sum(is.na(x))
+        ## 1.6 Configure numeric as categoricals
+        if (inherits(x, c("double", "numeric", "integer")) & isTRUE(as.categorical)) {
+          x <- as.factor(x)
         }
-        if (is.null(n.classes)) {
-          n.classes <- grDevices::nclass.Sturges(x)
-        }
-      }
-      ## 1.6 Configure n.breaks ----------------------------------------------------
-      if (inherits(x, c("double", "numeric", "integer"))) {
-        if (isTRUE(tidy.breaks)) {
-          if (lower.limit != min(x, na.rm = TRUE) | upper.limit != max(x, na.rm = TRUE)){
-            warning("Limits set automatically when tidy.breaks argument is TRUE. Only n.classes argument is used.") 
+        ## Configure from and to values
+        if (inherits(x, c("double", "numeric", "integer"))) {
+          if (is.null(lower.limit)) {
+            lower.limit <- min(x, na.rm = TRUE)
           }
-          n.breaks <- graphics::hist(x, breaks=n.classes, include.lowest = TRUE, right = TRUE,
-                                     plot = FALSE)$breaks
-        } else if (length(n.classes) == 1) {
-          if (n.classes >= 1) {
-            if (n.classes != nclass.Sturges(x)) {
-              n.breaks <- seq(
-                from = lower.limit,
-                to = upper.limit,
-                length = n.classes + 1
-              )
-            } else {
-              n.breaks <- seq(
-                from = lower.limit,
-                to = upper.limit,
-                length = n.classes
-              )
+          if (is.null(upper.limit)) {
+            upper.limit <- max(x, na.rm = TRUE)
+          }
+          if (is.null(n.classes)) {
+            n.classes <- grDevices::nclass.Sturges(x)
+          }
+        }
+        ## 1.6 Configure n.breaks ----------------------------------------------------
+        if (inherits(x, c("double", "numeric", "integer"))) {
+          if (isTRUE(tidy.breaks)) {
+            if (lower.limit != min(x, na.rm = TRUE) | upper.limit != max(x, na.rm = TRUE)){
+              warning("Limits set automatically when tidy.breaks argument is TRUE. Only n.classes argument is used.") 
             }
+            n.breaks <- graphics::hist(x, breaks=n.classes, include.lowest = TRUE, right = TRUE,
+                                       plot = FALSE)$breaks
+          } else if (length(n.classes) == 1) {
+            if (n.classes >= 1) {
+              if (n.classes != nclass.Sturges(x)) {
+                n.breaks <- seq(
+                  from = lower.limit,
+                  to = upper.limit,
+                  length = n.classes + 1
+                )
+              } else {
+                n.breaks <- seq(
+                  from = lower.limit,
+                  to = upper.limit,
+                  length = n.classes
+                )
+              }
+            } else {
+              stop("Value of number of classes should be greater than 0")
+            }
+          } else if (length(n.classes) > 1) {
+            n.breaks <- n.classes
           } else {
-            stop("Value of number of classes should be greater than 0")
+            stop("Invalid value for classes")
           }
-        } else if (length(n.classes) > 1) {
-          n.breaks <- n.classes
-        } else {
-          stop("Invalid value for classes")
-        }
-      } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))) {
-        if (is.character(time.breaks)) {
-          n.breaks <- time.breaks
-        } else if (is.numeric(time.breaks)) {
-          n.breaks <- time.breaks
-        } else {
-          stop("Please set time.breaks argument for date-time variable. E.g.: \"secs\", \"mins\", \"hours\", \"days\", \"weeks\", \"months\", \"years\", \"DSTdays\" or \"quarters\"")
-        }
-      } 
-      ## 1.7 Action for numeric and categorical vectors ----------------------------
-      n.categories <- length(unique(x))
-      na.values <- c("NA VALUES" = sum(is.na(x)))
-      categories.limit <- 15
-      if (isTRUE(compare.valids)) {
-        if (inherits(x, c("double", "numeric", "integer")) &
-            is.null(svy.design)) {
-          if (n.categories > categories.limit) {
-            freqs <- table(cut(x, breaks = n.breaks, include.lowest = TRUE, right = FALSE), 
-                           exclude = TRUE, useNA = "no")
-            slice <- sum(freqs)
-            other.values <- c("REST OF VALUES" = length(x) - sum(slice,na.values))
-            if (other.values > 0) {
-              freqs.na <- c(freqs, other.values, na.values)
-              freqs <- c(freqs, other.values, "NA VALUES" = 0)
+        } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))) {
+          if (is.character(time.breaks)) {
+            n.breaks <- time.breaks
+          } else if (is.numeric(time.breaks)) {
+            n.breaks <- time.breaks
+          } else {
+            stop("Please set time.breaks argument for date-time variable. E.g.: \"secs\", \"mins\", \"hours\", \"days\", \"weeks\", \"months\", \"years\", \"DSTdays\" or \"quarters\"")
+          }
+        } 
+        ## 1.7 Action for numeric and categorical vectors ----------------------------
+        n.categories <- length(unique(x))
+        na.values <- c("NA VALUES" = sum(is.na(x)))
+        categories.limit <- 15
+        if (isTRUE(compare.valids)) {
+          if (inherits(x, c("double", "numeric", "integer")) &
+              is.null(svy.design)) {
+            if (n.categories > categories.limit) {
+              freqs <- table(cut(x, breaks = n.breaks, include.lowest = TRUE, right = FALSE), 
+                             exclude = TRUE, useNA = "no")
+              slice <- sum(freqs)
+              other.values <- c("REST OF VALUES" = length(x) - sum(slice,na.values))
+              if (other.values > 0) {
+                freqs.na <- c(freqs, other.values, na.values)
+                freqs <- c(freqs, other.values, "NA VALUES" = 0)
+              } else {
+                freqs.na <- c(freqs, na.values)
+                freqs <- c(freqs, "NA VALUES" = 0)
+              }
             } else {
-              freqs.na <- c(freqs, na.values)
+              freqs <- table(classes = x,
+                             exclude = TRUE,
+                             useNA = "no")
               freqs <- c(freqs, "NA VALUES" = 0)
+              freqs.na <- table(classes = x,
+                                exclude = TRUE,
+                                useNA = "no")
+              freqs.na <- c(freqs.na, na.values)
             }
+          } else if (inherits(x, c("factor", "character", "logical")) &
+                     is.null(svy.design)) {
+            if (is.null(weights)) {
+                  freqs <- table(classes = x,
+                                 exclude = TRUE,
+                                 useNA = "no")
+                  freqs <- c(freqs, "NA VALUES" = 0)
+                  freqs.na <- table(classes = x,
+                                    exclude = TRUE,
+                                    useNA = "no")
+                  freqs.na <- c(freqs.na, na.values)
+            } else if (is.numeric(weights)) {
+                  freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+                  freqs <- c(freqs, "NA VALUES" = 0)
+                  freqs.na <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+                  freqs.na <- c(freqs.na, na.values)
+            }
+          } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
+                     is.null(svy.design)) {
+            x <- as.POSIXct(x)
+            freqs <- table(cut.POSIXt(x, breaks = n.breaks, 
+                                      start.on.monday = TRUE, 
+                                      include.lowest = TRUE),
+                           exclude = TRUE,
+                           useNA = "no")
+            freqs <- c(freqs, "NA VALUES" = 0)
+            freqs.na <- table(cut.POSIXt(x, breaks = n.breaks, 
+                                         start.on.monday = TRUE, 
+                                         include.lowest = TRUE),
+                              exclude = TRUE,
+                              useNA = "no")
+            freqs.na <- c(freqs.na, na.values)
+          } else if (isTRUE(inherits(svy.design, 
+                                     c("survey.design2", "survey.design", "svyrep.design")))) {
+            freqs.na <- survey::svytable(stats::as.formula( paste0( "~" , x)),
+                                 design = svy.design, round = TRUE)
+            freqs    <- survey::svytable(stats::as.formula( paste0( "~" , x)),
+                                      design = svy.design, round = TRUE)
           } else {
             freqs <- table(classes = x,
                            exclude = TRUE,
@@ -287,485 +335,443 @@
                               useNA = "no")
             freqs.na <- c(freqs.na, na.values)
           }
-        } else if (inherits(x, c("factor", "character", "logical")) &
-                   is.null(svy.design)) {
-          if (is.null(weights)) {
-                freqs <- table(classes = x,
-                               exclude = TRUE,
-                               useNA = "no")
-                freqs <- c(freqs, "NA VALUES" = 0)
-                freqs.na <- table(classes = x,
-                                  exclude = TRUE,
-                                  useNA = "no")
-                freqs.na <- c(freqs.na, na.values)
-          } else if (is.numeric(weights)) {
-                freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
-                freqs <- c(freqs, "NA VALUES" = 0)
-                freqs.na <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
-                freqs.na <- c(freqs.na, na.values)
-          }
-        } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
-                   is.null(svy.design)) {
-          x <- as.POSIXct(x)
-          freqs <- table(cut.POSIXt(x, breaks = n.breaks, 
-                                    start.on.monday = TRUE, 
-                                    include.lowest = TRUE),
-                         exclude = TRUE,
-                         useNA = "no")
-          freqs <- c(freqs, "NA VALUES" = 0)
-          freqs.na <- table(cut.POSIXt(x, breaks = n.breaks, 
-                                       start.on.monday = TRUE, 
-                                       include.lowest = TRUE),
-                            exclude = TRUE,
-                            useNA = "no")
-          freqs.na <- c(freqs.na, na.values)
-        } else if (isTRUE(inherits(svy.design, 
-                                   c("survey.design2", "survey.design", "svyrep.design")))) {
-          freqs.na <- survey::svytable(stats::as.formula( paste0( "~" , x)),
-                               design = svy.design, round = TRUE)
-          freqs    <- survey::svytable(stats::as.formula( paste0( "~" , x)),
-                                    design = svy.design, round = TRUE)
-        } else {
-          freqs <- table(classes = x,
-                         exclude = TRUE,
-                         useNA = "no")
-          freqs <- c(freqs, "NA VALUES" = 0)
-          freqs.na <- table(classes = x,
-                            exclude = TRUE,
-                            useNA = "no")
-          freqs.na <- c(freqs.na, na.values)
-        }
-       # Compare valids as FALSE
-      } else if (isFALSE(compare.valids)) {
-        if (inherits(x, c("double", "numeric", "integer"))  &
-            is.null(svy.design)) {
-          if (n.categories > categories.limit) {
-            freqs <- table(cut(x, breaks = n.breaks, 
-                               include.lowest = TRUE, right = FALSE, dig.lab = 6), 
-                           exclude = TRUE, useNA = "no")
-            slice <- sum(freqs)
-            na.values <- c("NA VALUES" = na.counts)
-            other.values <- c("REST OF VALUES" = length(x) - sum(slice,na.values))
-            if (other.values > 0) {
-              if (isTRUE(na.count)) {
-                freqs <- c(freqs, other.values, na.values)
+         # Compare valids as FALSE
+        } else if (isFALSE(compare.valids)) {
+          if (inherits(x, c("double", "numeric", "integer"))  &
+              is.null(svy.design)) {
+            if (n.categories > categories.limit) {
+              freqs <- table(cut(x, breaks = n.breaks, 
+                                 include.lowest = TRUE, right = FALSE, dig.lab = 6), 
+                             exclude = TRUE, useNA = "no")
+              slice <- sum(freqs)
+              na.values <- c("NA VALUES" = na.counts)
+              other.values <- c("REST OF VALUES" = length(x) - sum(slice,na.values))
+              if (other.values > 0) {
+                if (isTRUE(na.count)) {
+                  freqs <- c(freqs, other.values, na.values)
+                } else {
+                  freqs <- c(freqs,other.values)
+                }
               } else {
-                freqs <- c(freqs,other.values)
+                if (isTRUE(na.count)) {
+                  freqs <- c(freqs, na.values)
+                }
               }
             } else {
               if (isTRUE(na.count)) {
-                freqs <- c(freqs, na.values)
+                freqs <- table(
+                  classes = x,
+                  exclude = TRUE,
+                  useNA = "no"
+                )
+                freqs <- c(freqs,na.values)
+              } else {
+                freqs <- table(
+                  classes = x,
+                  exclude = TRUE,
+                  useNA = "no"
+                )
               }
             }
-          } else {
-            if (isTRUE(na.count)) {
-              freqs <- table(
-                classes = x,
-                exclude = TRUE,
-                useNA = "no"
-              )
-              freqs <- c(freqs,na.values)
-            } else {
-              freqs <- table(
-                classes = x,
-                exclude = TRUE,
-                useNA = "no"
-              )
+          } else if (inherits(x, c("factor", "character", "logical")) &
+                     is.null(svy.design)) {
+            if (is.null(weights)) {
+                if (isTRUE(na.count)) {
+                  freqs <- table(classes = x,
+                               exclude = TRUE,
+                               useNA ="no")
+                  freqs <- c(freqs, na.values)
+                } else {
+                  freqs <- table(classes = x,
+                                 exclude = TRUE,
+                                 useNA ="no")
+                }
+            } else if (is.numeric(weights)) {
+                freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
             }
+          } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
+                     is.null(svy.design)) {
+            x <- as.POSIXct(x)
+            freqs <- table(cut.POSIXt(x, breaks = n.breaks, 
+                                      start.on.monday = TRUE, 
+                                      include.lowest = TRUE),
+                           exclude = !na.count,
+                           useNA = use)
+          } else if (inherits(svy.design,
+                              c("survey.design2", "survey.design", "svyrep.design"))) {
+            freqs <- survey::svytable(stats::as.formula( paste0("~", x)),design = svy.design, 
+                                      round = TRUE)
+          } else {
+            freqs <- table(
+              classes = x,
+              exclude = !na.count,
+              useNA = use
+            )
           }
-        } else if (inherits(x, c("factor", "character", "logical")) &
-                   is.null(svy.design)) {
-          if (is.null(weights)) {
-              freqs <- table(classes = x,
-                             exclude = !na.count,
-                             useNA =use)
-          } else if (is.numeric(weights)) {
-              freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+        }
+        ## Sort
+        if (isTRUE(sort.decreasing)) {
+          if (isTRUE(compare.valids)) {
+            freqs.na <- sort(freqs.na, decreasing = TRUE)
+            index <- names(freqs.na)
+            freqs <- freqs[index]
+          } else {
+            freqs <- sort(freqs, decreasing = TRUE)
           }
-        } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
-                   is.null(svy.design)) {
-          x <- as.POSIXct(x)
-          freqs <- table(cut.POSIXt(x, breaks = n.breaks, 
-                                    start.on.monday = TRUE, 
-                                    include.lowest = TRUE),
-                         exclude = !na.count,
-                         useNA = use)
-        } else if (inherits(svy.design,
-                            c("survey.design2", "survey.design", "svyrep.design"))) {
-          freqs <- survey::svytable(stats::as.formula( paste0("~", x)),design = svy.design, 
-                                    round = TRUE)
-        } else {
-          freqs <- table(
-            classes = x,
-            exclude = !na.count,
-            useNA = use
-          )
+        } else if(isFALSE(sort.decreasing)) {
+          if (isTRUE(compare.valids)) {
+            freqs.na <- sort(freqs.na, decreasing = FALSE)
+            index <- names(freqs.na)
+            freqs <- freqs[index]
+          } else {
+            freqs <- sort(freqs, decreasing = FALSE)
+          }
         }
-      }
-      ## Sort
-      if (isTRUE(sort.decreasing)) {
+        ## 1.9 Function to define which columns to add -------------------------------
         if (isTRUE(compare.valids)) {
-          freqs.na <- sort(freqs.na, decreasing = TRUE)
-          index <- names(freqs.na)
-          freqs <- freqs[index]
+          counts.table.na <- function(freqs, freqs.na, type) {
+            switch(
+              type,
+              none = cbind(freqs.n = freqs.na),
+              only.rel.cumulative = cbind(
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid = cumsum(prop.table(freqs))
+              ),
+              only.cumulative = cbind(
+                cumulative.freqs.n = cumsum(freqs.na),
+                cumulative.freqs.valid = cumsum(freqs)
+              ),
+              only.cumulatives = cbind(
+                cumulative.freqs.n = cumsum(freqs.na),
+                cumulative.freqs.valid = cumsum(freqs),
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(prop.table(freqs))
+              ),
+              only.rel.freq = cbind(
+                relative.freqs.n = prop.table(freqs.na),
+                relative.freqs.valid = prop.table(freqs)
+              ),
+              only.relatives = cbind(
+                relative.freqs.n = prop.table(freqs.na),
+                relative.freqs.valid = prop.table(freqs),
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(prop.table(freqs))
+              ),
+              relative.and.cumulative = cbind(
+                relative.freqs.n =
+                  prop.table(freqs.na),
+                relative.freqs.valid =
+                  prop.table(freqs)
+              ),
+              cumulative.freqs.n =
+                cumsum(freqs.na),
+              cumulative.freqs.valid =
+                cumsum(freqs),
+              relative.and.cumulatives = cbind(
+                relative.freqs.n =
+                  prop.table(freqs.na),
+                relative.freqs.valid =
+                  prop.table(freqs),
+                cumulative.freqs.n =
+                  cumsum(freqs.na),
+                cumulative.freqs.valid =
+                  cumsum(freqs),
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(c(prop.table(freqs)))
+              ),
+              only.freqs = cbind(freqs.n = freqs.na,
+                                 freqs.valid = c(freqs)),
+              freqs.and.rel.cumulative = cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(prop.table(freqs))
+              ),
+              freqs.and.cumulative =  cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                cumulative.freqs.n =
+                  cumsum(freqs.na),
+                cumulative.freqs.valid =
+                  cumsum(freqs)
+              ),
+              freqs.and.cumulatives = cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                cumulative.freqs.n =
+                  cumsum(freqs.na),
+                cumulative.freqs.valid =
+                  cumsum(freqs),
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(prop.table(freqs))
+              ),
+              freqs.and.relative = cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                relative.freqs.n =
+                  prop.table(freqs.na),
+                relative.freqs.valid =
+                  c(prop.table(freqs))
+              ),
+              freqs.and.relatives = cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                relative.freqs.n =
+                  prop.table(freqs.na),
+                relative.freqs.valid =
+                  prop.table(freqs),
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(prop.table(freqs))
+              ),
+              freqs.relative.and.cumulative = cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                relative.freqs.n =
+                  prop.table(freqs.na),
+                relative.freqs.valid =
+                  prop.table(freqs),
+                cumulative.freqs.n =
+                  cumsum(freqs.na),
+                cumulative.freqs.valid =
+                  cumsum(freqs)
+              ),
+              all = cbind(
+                freqs.n = freqs.na,
+                freqs.valid = freqs,
+                relative.freqs.n =
+                  prop.table(freqs.na),
+                relative.freqs.valid =
+                  prop.table(freqs),
+                cumulative.freqs.n =
+                  cumsum(freqs.na),
+                cumulative.freqs.valid =
+                  cumsum(freqs),
+                rel.cumulative.freqs.n =
+                  cumsum(prop.table(freqs.na)),
+                rel.cumulative.freqs.valid =
+                  cumsum(prop.table(freqs))
+              )
+            ) # switch closing parenthesis
+          }
         } else {
-          freqs <- sort(freqs, decreasing = TRUE)
+          counts.table <- function(freqs, type) {
+            switch(
+              type,
+              none = cbind(freqs),
+              only.rel.cumulative = cbind(rel.cumulative.freqs =
+                                            cumsum(prop.table(freqs))),
+              only.cumulative = cbind(cumulative.freqs = cumsum(freqs)),
+              only.cumulatives = cbind(
+                cumulative.freqs = cumsum(freqs),
+                rel.cumulative.freqs =
+                  cumsum(prop.table(freqs))
+              ),
+              only.rel.freq = cbind(relative.freqs = prop.table(freqs)),
+              only.relatives = cbind(
+                relative.freqs = prop.table(freqs),
+                rel.cumulative.freqs =
+                  cumsum(prop.table(freqs))
+              ),
+              relative.and.cumulative = cbind(
+                relative.freqs =
+                  prop.table(freqs),
+                cumulative.freqs =
+                  cumsum(freqs)
+              ),
+              relative.and.cumulatives = cbind(
+                relative.freqs =
+                  prop.table(freqs),
+                cumulative.freqs =
+                  cumsum(freqs),
+                rel.cumulative.freqs =
+                  cumsum(prop.table(freqs))
+              ),
+              only.freqs = cbind(freqs),
+              freqs.and.rel.cumulative = cbind(freqs,
+                                               rel.cumulative.freqs =
+                                                 cumsum(prop.table(freqs))),
+              freqs.and.cumulative =  cbind(freqs,
+                                            cumulative.freqs =
+                                              cumsum(freqs)),
+              freqs.and.cumulatives = cbind(
+                freqs,
+                cumulative.freqs =
+                  cumsum(freqs),
+                rel.cumulative.freqs =
+                  cumsum(prop.table(freqs))
+              ),
+              freqs.and.relative = cbind(freqs,
+                                         relative.freqs =
+                                           prop.table(freqs)),
+              freqs.and.relatives = cbind(
+                freqs,
+                relative.freqs =
+                  prop.table(freqs),
+                rel.cumulative.freqs =
+                  cumsum(prop.table(freqs))
+              ),
+              freqs.relative.and.cumulative = cbind(
+                freqs,
+                relative.freqs =
+                  prop.table(freqs),
+                cumulative.freqs =
+                  cumsum((freqs))
+              ),
+              all = cbind(
+                freqs,
+                relative.freqs =
+                  prop.table(freqs),
+                cumulative.freqs =
+                  cumsum((freqs)),
+                rel.cumulative.freqs =
+                  cumsum(prop.table(freqs))
+              )
+            )
+          }
         }
-      } else if(isFALSE(sort.decreasing)) {
-        if (isTRUE(compare.valids)) {
-          freqs.na <- sort(freqs.na, decreasing = FALSE)
-          index <- names(freqs.na)
-          freqs <- freqs[index]
+        ## 1.10 Run counts.table() function ------------------------------------------
+        if (isFALSE(compare.valids)) {
+          freq.table <- counts.table(freqs, type = table.type)
         } else {
-          freqs <- sort(freqs, decreasing = FALSE)
+          freq.table <- counts.table.na(freqs, freqs.na, type = table.type)
         }
-      }
-      
-      ## 1.9 Function to define which columns to add -------------------------------
-      if (isTRUE(compare.valids)) {
-        counts.table.na <- function(freqs, freqs.na, type) {
-          switch(
-            type,
-            none = cbind(freqs.n = freqs.na),
-            only.rel.cumulative = cbind(
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid = cumsum(prop.table(freqs))
-            ),
-            only.cumulative = cbind(
-              cumulative.freqs.n = cumsum(freqs.na),
-              cumulative.freqs.valid = cumsum(freqs)
-            ),
-            only.cumulatives = cbind(
-              cumulative.freqs.n = cumsum(freqs.na),
-              cumulative.freqs.valid = cumsum(freqs),
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(prop.table(freqs))
-            ),
-            only.rel.freq = cbind(
-              relative.freqs.n = prop.table(freqs.na),
-              relative.freqs.valid = prop.table(freqs)
-            ),
-            only.relatives = cbind(
-              relative.freqs.n = prop.table(freqs.na),
-              relative.freqs.valid = prop.table(freqs),
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(prop.table(freqs))
-            ),
-            relative.and.cumulative = cbind(
-              relative.freqs.n =
-                prop.table(freqs.na),
-              relative.freqs.valid =
-                prop.table(freqs)
-            ),
-            cumulative.freqs.n =
-              cumsum(freqs.na),
-            cumulative.freqs.valid =
-              cumsum(freqs),
-            relative.and.cumulatives = cbind(
-              relative.freqs.n =
-                prop.table(freqs.na),
-              relative.freqs.valid =
-                prop.table(freqs),
-              cumulative.freqs.n =
-                cumsum(freqs.na),
-              cumulative.freqs.valid =
-                cumsum(freqs),
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(c(prop.table(freqs)))
-            ),
-            only.freqs = cbind(freqs.n = freqs.na,
-                               freqs.valid = c(freqs)),
-            freqs.and.rel.cumulative = cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(prop.table(freqs))
-            ),
-            freqs.and.cumulative =  cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              cumulative.freqs.n =
-                cumsum(freqs.na),
-              cumulative.freqs.valid =
-                cumsum(freqs)
-            ),
-            freqs.and.cumulatives = cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              cumulative.freqs.n =
-                cumsum(freqs.na),
-              cumulative.freqs.valid =
-                cumsum(freqs),
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(prop.table(freqs))
-            ),
-            freqs.and.relative = cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              relative.freqs.n =
-                prop.table(freqs.na),
-              relative.freqs.valid =
-                c(prop.table(freqs))
-            ),
-            freqs.and.relatives = cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              relative.freqs.n =
-                prop.table(freqs.na),
-              relative.freqs.valid =
-                prop.table(freqs),
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(prop.table(freqs))
-            ),
-            freqs.relative.and.cumulative = cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              relative.freqs.n =
-                prop.table(freqs.na),
-              relative.freqs.valid =
-                prop.table(freqs),
-              cumulative.freqs.n =
-                cumsum(freqs.na),
-              cumulative.freqs.valid =
-                cumsum(freqs)
-            ),
-            all = cbind(
-              freqs.n = freqs.na,
-              freqs.valid = freqs,
-              relative.freqs.n =
-                prop.table(freqs.na),
-              relative.freqs.valid =
-                prop.table(freqs),
-              cumulative.freqs.n =
-                cumsum(freqs.na),
-              cumulative.freqs.valid =
-                cumsum(freqs),
-              rel.cumulative.freqs.n =
-                cumsum(prop.table(freqs.na)),
-              rel.cumulative.freqs.valid =
-                cumsum(prop.table(freqs))
-            )
-          ) # switch closing parenthesis
+        ## 1.11 Show totals or not
+        if (isTRUE(show.totals)) {
+          if (table.type != "none") {
+            TOTAL <- colSums(freq.table, na.rm = TRUE)
+            freq.table <- rbind(freq.table, TOTAL)
+          }
         }
-      } else {
-        counts.table <- function(freqs, type) {
-          switch(
-            type,
-            none = cbind(freqs),
-            only.rel.cumulative = cbind(rel.cumulative.freqs =
-                                          cumsum(prop.table(freqs))),
-            only.cumulative = cbind(cumulative.freqs = cumsum(freqs)),
-            only.cumulatives = cbind(
-              cumulative.freqs = cumsum(freqs),
-              rel.cumulative.freqs =
-                cumsum(prop.table(freqs))
-            ),
-            only.rel.freq = cbind(relative.freqs = prop.table(freqs)),
-            only.relatives = cbind(
-              relative.freqs = prop.table(freqs),
-              rel.cumulative.freqs =
-                cumsum(prop.table(freqs))
-            ),
-            relative.and.cumulative = cbind(
-              relative.freqs =
-                prop.table(freqs),
-              cumulative.freqs =
-                cumsum(freqs)
-            ),
-            relative.and.cumulatives = cbind(
-              relative.freqs =
-                prop.table(freqs),
-              cumulative.freqs =
-                cumsum(freqs),
-              rel.cumulative.freqs =
-                cumsum(prop.table(freqs))
-            ),
-            only.freqs = cbind(freqs),
-            freqs.and.rel.cumulative = cbind(freqs,
-                                             rel.cumulative.freqs =
-                                               cumsum(prop.table(freqs))),
-            freqs.and.cumulative =  cbind(freqs,
-                                          cumulative.freqs =
-                                            cumsum(freqs)),
-            freqs.and.cumulatives = cbind(
-              freqs,
-              cumulative.freqs =
-                cumsum(freqs),
-              rel.cumulative.freqs =
-                cumsum(prop.table(freqs))
-            ),
-            freqs.and.relative = cbind(freqs,
-                                       relative.freqs =
-                                         prop.table(freqs)),
-            freqs.and.relatives = cbind(
-              freqs,
-              relative.freqs =
-                prop.table(freqs),
-              rel.cumulative.freqs =
-                cumsum(prop.table(freqs))
-            ),
-            freqs.relative.and.cumulative = cbind(
-              freqs,
-              relative.freqs =
-                prop.table(freqs),
-              cumulative.freqs =
-                cumsum((freqs))
-            ),
-            all = cbind(
-              freqs,
-              relative.freqs =
-                prop.table(freqs),
-              cumulative.freqs =
-                cumsum((freqs)),
-              rel.cumulative.freqs =
-                cumsum(prop.table(freqs))
-            )
-          )
-        }
-      }
-      ## 1.10 Run counts.table() function ------------------------------------------
-      if (isFALSE(compare.valids)) {
-        freq.table <- counts.table(freqs, type = table.type)
-      } else {
-        freq.table <- counts.table.na(freqs, freqs.na, type = table.type)
-      }
-      ## 1.11 Show totals or not
-      if (isTRUE(show.totals)) {
+        ## 1.11 Round decimal values -------------------------------------------------
         if (table.type != "none") {
-          TOTAL <- colSums(freq.table, na.rm = TRUE)
-          freq.table <- rbind(freq.table, TOTAL)
-        }
-      }
-      ## 1.11 Round decimal values -------------------------------------------------
-      if (table.type != "none") {
-        freq.table[,
-                   grep(pattern = "rel",
-                        x = colnames(freq.table),
-                        value = FALSE)] <-
-          round(freq.table[,
-                           grep(pattern = "rel",
-                                x = colnames(freq.table),
-                                value = FALSE)],
-                digits = n.digits + 2)
-      }
-      ## 1.12 Show percent values --------------------------------------------------
-      if (isTRUE(show.percent)) {
-        classes <- rownames(freq.table)
-        freq.table[,
-                   grep(pattern = "rel",
-                        x = colnames(freq.table),
-                        value = FALSE)] <-
-          round(freq.table[,
-                           grep(pattern = "rel",
-                                x = colnames(freq.table),
-                                value = FALSE)] * 100,
-                digits = n.digits)
-        freq.table <- data.frame(classes, freq.table,
-                                 row.names = NULL)
-      } else {
-        classes <- rownames(freq.table)
-        freq.table <- data.frame(classes, freq.table,
-                                 row.names = NULL)
-      }
-      ## 1.13 Format cumulative values ---------------------------------------------
-      if (isFALSE(compare.valids)) {
-        if (table.type != "none") {
-          freq.table[nrow(freq.table),
-                     grep(pattern = "cumul",
+          freq.table[,
+                     grep(pattern = "rel",
                           x = colnames(freq.table),
-                          value = FALSE)] <- NA
+                          value = FALSE)] <-
+            round(freq.table[,
+                             grep(pattern = "rel",
+                                  x = colnames(freq.table),
+                                  value = FALSE)],
+                  digits = n.digits + 2)
         }
-      } else {
-        if (table.type != "none") {
-          freq.table[which(freq.table$classes == "TOTAL"),
-                     grep(pattern = "cumul",
+        ## 1.12 Show percent values --------------------------------------------------
+        if (isTRUE(show.percent)) {
+          classes <- rownames(freq.table)
+          freq.table[,
+                     grep(pattern = "rel",
                           x = colnames(freq.table),
-                          value = FALSE)] <- NA
+                          value = FALSE)] <-
+            round(freq.table[,
+                             grep(pattern = "rel",
+                                  x = colnames(freq.table),
+                                  value = FALSE)] * 100,
+                  digits = n.digits)
+          freq.table <- data.frame(classes, freq.table,
+                                   row.names = NULL)
+        } else {
+          classes <- rownames(freq.table)
+          freq.table <- data.frame(classes, freq.table,
+                                   row.names = NULL)
         }
-      }
-      ## Delete counts for "none" type frequency table
-      if (table.type == "none") {
-        freq.table[, 2] <- NULL
-      }
-      ## 1.14 Format classes -------------------------------------------------------
-      freq.table[, 1] <- ifelse(
-        is.na(as.character(freq.table[, 1])) |
-          nchar(as.character(freq.table[, 1])) == 0,
-        "NA VALUES",
-        as.character(freq.table[, 1])
-      )
-      not.categorical <-
-        !inherits(x,c("factor", "character", "logical"))
-      continuous <-
-        ((
-          inherits(x, c("double", "numeric","integer"))
-        ) & 
-          (n.categories > categories.limit))
-      if (not.categorical) {
-        if (continuous) {
-          a <- freq.table[, 1]
-          indices <-
-            which(grepl(pattern = "[[:digit:]]", x = as.character(freq.table[, 1])))
-          b <- a[indices]
-          pattern <-
-            "([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])"
-          proto <-
-            data.frame(
-              limit.type.ll = character(),
-              lower.limit = numeric(),
-              separator = character(),
-              upper.limit = numeric(),
-              limit.type.ul = character()
-            )
-          (limits <- utils::strcapture(pattern, b, proto))
-          index.max <- which.max(sapply(X = limits[, 2],FUN =  nchar))
-          limits[index.max, 2]
-          digits <-
-            nchar(unlist(strsplit(
-              x = as.character(limits[index.max, 2]),
-              split = "[.]"
-            )))[1]
-          decimals <-
-            nchar(unlist(strsplit(
-              x = as.character(limits[index.max, 2]),
-              split = "[.]"
-            )))[2]
-          decimals <- ifelse(is.na(decimals), 0, decimals)
-          limits <-
-            format(limits, digits = digits, nsmall = decimals)
-          limits <- do.call(paste0, limits)
-          freq.table[indices, 1] <- limits
+        ## 1.13 Format cumulative values ---------------------------------------------
+        if (isFALSE(compare.valids)) {
+          if (table.type != "none") {
+            freq.table[nrow(freq.table),
+                       grep(pattern = "cumul",
+                            x = colnames(freq.table),
+                            value = FALSE)] <- NA
+          }
+        } else {
+          if (table.type != "none") {
+            freq.table[which(freq.table$classes == "TOTAL"),
+                       grep(pattern = "cumul",
+                            x = colnames(freq.table),
+                            value = FALSE)] <- NA
+          }
         }
-      }
-      freq.table[, 1] <- format(freq.table[, 1], justify = "left",
-                                na.encode = FALSE)
-      if (isTRUE(thousands.mark)) {
-        freq.table <- format(freq.table, big.mark = ",")
-      }
-      ## 1.15 Return as data.frame or with Markdown format -------------------------
-      if (isFALSE(as.markdown)) {
-        return(freq.table)
-      } else if (isTRUE(as.markdown)) {
-        pander::pander(freq.table)
-      }
+        ## Delete counts for "none" type frequency table
+        if (table.type == "none") {
+          freq.table[, 2] <- NULL
+        }
+        ## 1.14 Format classes -------------------------------------------------------
+        freq.table[, 1] <- ifelse(
+          is.na(as.character(freq.table[, 1])) |
+            nchar(as.character(freq.table[, 1])) == 0,
+          "NA VALUES",
+          as.character(freq.table[, 1])
+        )
+        not.categorical <-
+          !inherits(x,c("factor", "character", "logical"))
+        continuous <-
+          ((
+            inherits(x, c("double", "numeric","integer"))
+          ) & 
+            (n.categories > categories.limit))
+        if (not.categorical) {
+          if (continuous) {
+            a <- freq.table[, 1]
+            indices <-
+              which(grepl(pattern = "[[:digit:]]", x = as.character(freq.table[, 1])))
+            b <- a[indices]
+            pattern <-
+              "([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])"
+            proto <-
+              data.frame(
+                limit.type.ll = character(),
+                lower.limit = numeric(),
+                separator = character(),
+                upper.limit = numeric(),
+                limit.type.ul = character()
+              )
+            (limits <- utils::strcapture(pattern, b, proto))
+            index.max <- which.max(nchar(format(limits[,2])))
+            limits[index.max, 2]
+            digits <-
+              nchar(unlist(strsplit(
+                x = as.character(limits[index.max, 2]),
+                split = "[.]"
+              )))[1]
+            decimals <-
+              nchar(unlist(strsplit(
+                x = as.character(limits[index.max, 2]),
+                split = "[.]"
+              )))[2]
+            decimals <- ifelse(is.na(decimals), 0, decimals)
+            limits <-
+              format(limits, digits = digits, nsmall = decimals, big.mark = " ")
+            limits <- do.call(paste0, limits)
+            freq.table[indices, 1] <- limits
+          }
+        }
+        freq.table[, 1] <- format(freq.table[, 1], justify = "left",
+                                  na.encode = FALSE)
+        if (isTRUE(use.thousands.mark)) {
+          freq.table <- format(freq.table, big.mark = ",")
+        }
+        ## 1.15 Return as data.frame or with Markdown format -------------------------
+        if (isFALSE(as.markdown)) {
+          return(freq.table)
+        } else if (isTRUE(as.markdown)) {
+          pander::pander(freq.table)
+        }
     }
-    if  (is.vector(x)) {
+    if  (is.vector(x) | is.factor(x)) {
       ft <-  workhorse(x)
     } else if(is.data.frame(x)) {
-      ft <-  lapply(x,workhorse)
+      ft <-  lapply(x, workhorse)
     }
     return(ft)
   }

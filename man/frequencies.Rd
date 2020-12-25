@@ -18,7 +18,7 @@ frequencies(
   time.breaks = NULL,
   tidy.breaks = FALSE,
   show.percent = TRUE,
-  thousands.mark = FALSE,
+  use.thousands.mark = FALSE,
   as.markdown = FALSE,
   as.categorical = FALSE,
   compare.valids = FALSE,
@@ -55,7 +55,7 @@ frequencies(
 
 \item{show.percent}{Logical. Show relative frequencies as percentage frequencies. Default is TRUE.}
 
-\item{thousands.mark}{Logical. Show the thousands mark for numeric columns. Warning: numeric variables are stored as character.}
+\item{use.thousands.mark}{Logical. Show the thousands mark for numeric columns. Warning: numeric variables will be stored as character.}
 
 \item{as.markdown}{Logical. Return the frequency table in RMarkdown format, uses the pander:: package.}
 
