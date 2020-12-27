@@ -1,7 +1,7 @@
-# 1. Define function name and its arguments -----------------------------------
+# 1. Define function name and its arguments ------------------------------------
 #'  Standard Frequency Tables in R
 #'
-#' @param x Vector or data.frane. A numeric or categorical variable of any type.
+#' @param x Vector or data.frame. A numeric or categorical variable of any type.
 #' @param weights Numeric. Weights for aggregating the categories in x. It should have the same length of x.
 #' @param n.classes Integer or numeric. If a single integer, it represents the number of classes for the numeric variable. If a vector of numeric values, it will represent the desired break points for the classes. Defaults to the number of classes determined by the Herbert Sturges algorithm.
 #' @param lower.limit Numeric. Lower classes limit. Along with n.classes, it determines the bins of a distribution for continuous variables. Defaults to the minimum value of the numeric vector.
@@ -11,7 +11,7 @@
 #' @param show.totals Logical. Show the sum of frequencies and relative/percentage frequencies.
 #' @param sort.decreasing NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.
 #' @param svy.design survey.design object. A survey design object from survey::package.
-#' @param time.breaks Character or integer. Specifies the aggregation class for date-time vaiables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.
+#' @param time.breaks Character or integer. Specifies the aggregation class for date-time variables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.
 #' @param tidy.breaks Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.
 #' @param show.percent Logical. Show relative frequencies as percentage frequencies. Default is TRUE.
 #' @param use.thousands.mark Logical. Show the thousands mark for numeric columns. Warning: numeric variables will be stored as character. 
@@ -29,57 +29,56 @@
 
   ## 1.2 Validate arguments ----------------------------------------------------
   frequencies <- function(x = NULL,
-                        weights = NULL,
-                        n.classes = NULL,
-                        lower.limit = NULL,
-                        upper.limit = NULL,
-                        na.count = TRUE,
-                        n.digits = 2,
-                        show.totals = TRUE,
-                        sort.decreasing = NULL,
-                        svy.design = NULL,
-                        time.breaks = NULL,
-                        tidy.breaks = FALSE,
-                        show.percent = TRUE,
-                        use.thousands.mark = FALSE,
-                        as.markdown = FALSE,
-                        as.categorical = FALSE,
-                        compare.valids = FALSE,
-                        show.relative = TRUE,
-                        show.cumulative = FALSE,
-                        show.rel.cumulative = FALSE,
-                        show.frequencies = TRUE) {
-    workhorse <- function(x,...) {
-      stopifnot({
-        is.null(x) | is.vector(x) |  is.data.frame(x)
-        is.null(weights) | is.numeric(weights)
-        is.null(n.classes)   | is.numeric(n.classes)
-        is.null(lower.limit) | is.numeric(lower.limit)
-        is.null(upper.limit) | is.numeric(upper.limit) 
-        is.logical(sort.decreasing) | is.null(sort.decreasing)
-        is.logical(tidy.breaks)
-        is.logical(na.count)
-        is.integer(n.digits)
-        is.logical(show.totals)
-        is.logical(show.percent)
-        is.logical(use.thousands.mark)
-        is.logical(show.relative)
-        is.logical(show.cumulative)
-        is.logical(show.rel.cumulative)
-        is.logical(show.frequencies)
-        is.logical(as.markdown)
-        is.logical(as.categorical)
-        is.null(svy.design) | isTRUE(inherits(svy.design, c("survey.design2", 
-                                                            "survey.design", 
-                                                            "svyrep.design")))
-        is.null(time.breaks) | (is.numeric(time.breaks) & 
-                                  length(time.breaks) == 1L) | 
-          inherits(time.breaks, c("POSIXt", "POSIXct", "POSIXlt", "Date")) | 
-          (time.breaks %in% c("secs", "mins", "hours", "days", "weeks", "months",
-                              "years", "DSTdays", "quarters") & 
-             length(time.breaks) == 1L)
-      })  
-        ## 1.3 Define frequency table types --------------------------------------------
+                          weights = NULL,
+                          n.classes = NULL,
+                          lower.limit = NULL,
+                          upper.limit = NULL,
+                          time.breaks = NULL,
+                          svy.design = NULL,
+                          sort.decreasing = NULL,
+                          tidy.breaks = FALSE,
+                          na.count = TRUE,
+                          n.digits = 2,
+                          show.totals = TRUE,
+                          show.percent = TRUE,
+                          use.thousands.mark = FALSE,
+                          as.markdown = FALSE,
+                          as.categorical = FALSE,
+                          compare.valids = FALSE,
+                          show.relative = TRUE,
+                          show.cumulative = FALSE,
+                          show.rel.cumulative = FALSE,
+                          show.frequencies = TRUE) {
+    stopifnot({
+      is.null(x) | is.vector(x) | is.factor(x) | is.data.frame(x) | 
+        inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))
+      is.null(weights) | is.numeric(weights)
+      is.null(n.classes)   | is.numeric(n.classes)
+      is.null(lower.limit) | is.numeric(lower.limit)
+      is.null(upper.limit) | is.numeric(upper.limit) 
+      is.logical(sort.decreasing) | is.null(sort.decreasing)
+      is.logical(tidy.breaks)
+      is.logical(na.count)
+      is.integer(n.digits)
+      is.logical(show.totals)
+      is.logical(show.percent)
+      is.logical(use.thousands.mark)
+      is.logical(show.relative)
+      is.logical(show.cumulative)
+      is.logical(show.rel.cumulative)
+      is.logical(show.frequencies)
+      is.logical(as.markdown)
+      is.logical(as.categorical)
+      is.null(svy.design) | isTRUE(inherits(svy.design, c("survey.design2", 
+                                                          "survey.design", 
+                                                          "svyrep.design")))
+      is.null(time.breaks) | (is.numeric(time.breaks) & 
+                                length(time.breaks) == 1L) | 
+      inherits(time.breaks, c("POSIXt", "POSIXct", "POSIXlt", "Date")) | 
+      is.character(time.breaks)
+    })  
+    freq.distro <- function(...) {
+        ## 1.3 Define frequency table types ------------------------------------
         table.type = character()
         table.type <-
           ifelse(
@@ -195,7 +194,7 @@
               )
             )
           )
-        ## 1.5 Configure na.counts ---------------------------------------------------
+        ## 1.5 Configure na.counts ---------------------------------------------
         if (isTRUE(na.count)) {
           use <- "always"
         } else {
@@ -218,13 +217,13 @@
             n.classes <- grDevices::nclass.Sturges(x)
           }
         }
-        ## 1.6 Configure n.breaks ----------------------------------------------------
+        ## 1.6 Configure n.breaks ----------------------------------------------
         if (inherits(x, c("double", "numeric", "integer"))) {
           if (isTRUE(tidy.breaks)) {
-            if (lower.limit != min(x, na.rm = TRUE) | upper.limit != max(x, na.rm = TRUE)){
+            if (lower.limit != min(x, na.rm = TRUE) | upper.limit != max(x, na.rm = TRUE)) {
               warning("Limits set automatically when tidy.breaks argument is TRUE. Only n.classes argument is used.") 
             }
-            n.breaks <- graphics::hist(x, breaks=n.classes, include.lowest = TRUE, right = TRUE,
+            n.breaks <- graphics::hist(x, breaks = n.classes, include.lowest = TRUE, right = TRUE,
                                        plot = FALSE)$breaks
           } else if (length(n.classes) == 1) {
             if (n.classes >= 1) {
@@ -251,14 +250,24 @@
           }
         } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))) {
           if (is.character(time.breaks)) {
-            n.breaks <- time.breaks
+            if (length(time.breaks) == 1L) {
+              if (time.breaks %in% c("secs", "mins", "hours", "days", "weeks", "months", "years", "DSTdays", "quarters")) {
+                    n.breaks <- time.breaks 
+              } else {
+                stop("Please set a valid time.breaks argument for date-time variable. E.g.: \"secs\", \"mins\", \"hours\", \"days\", \"weeks\", \"months\", \"years\", \"DSTdays\" or \"quarters\", an integer value or vector, or a date-time value or vector")
+              }
+            } else {
+              stop("When a string, the time.breaks argument for date-time variable shold have a length of 1")
+            }
           } else if (is.numeric(time.breaks)) {
             n.breaks <- time.breaks
+          } else if (inherits(time.breaks, c("POSIXt", "POSIXct", "POSIXlt", "Date"))) {
+            n.breaks <- as.POSIXct(time.breaks)
           } else {
-            stop("Please set time.breaks argument for date-time variable. E.g.: \"secs\", \"mins\", \"hours\", \"days\", \"weeks\", \"months\", \"years\", \"DSTdays\" or \"quarters\"")
+            stop("Please set a valid time.breaks argument for date-time variable. E.g.: \"secs\", \"mins\", \"hours\", \"days\", \"weeks\", \"months\", \"years\", \"DSTdays\" or \"quarters\", an integer value or vector, or a date-time value or vector")
           }
         } 
-        ## 1.7 Action for numeric and categorical vectors ----------------------------
+        ## 1.7 Action for numeric and categorical vectors ----------------------
         n.categories <- length(unique(x))
         na.values <- c("NA VALUES" = sum(is.na(x)))
         categories.limit <- 15
@@ -379,12 +388,12 @@
                 if (isTRUE(na.count)) {
                   freqs <- table(classes = x,
                                exclude = TRUE,
-                               useNA ="no")
+                               useNA = "no")
                   freqs <- c(freqs, na.values)
                 } else {
                   freqs <- table(classes = x,
                                  exclude = TRUE,
-                                 useNA ="no")
+                                 useNA = "no")
                 }
             } else if (is.numeric(weights)) {
                 freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
@@ -395,8 +404,8 @@
             freqs <- table(cut.POSIXt(x, breaks = n.breaks, 
                                       start.on.monday = TRUE, 
                                       include.lowest = TRUE),
-                           exclude = !na.count,
-                           useNA = use)
+                           exclude = FALSE,
+                           useNA = "always")
           } else if (inherits(svy.design,
                               c("survey.design2", "survey.design", "svyrep.design"))) {
             freqs <- survey::svytable(stats::as.formula( paste0("~", x)),design = svy.design, 
@@ -418,7 +427,7 @@
           } else {
             freqs <- sort(freqs, decreasing = TRUE)
           }
-        } else if(isFALSE(sort.decreasing)) {
+        } else if (isFALSE(sort.decreasing)) {
           if (isTRUE(compare.valids)) {
             freqs.na <- sort(freqs.na, decreasing = FALSE)
             index <- names(freqs.na)
@@ -427,7 +436,7 @@
             freqs <- sort(freqs, decreasing = FALSE)
           }
         }
-        ## 1.9 Function to define which columns to add -------------------------------
+        ## 1.9 Function to define which columns to add -------------------------
         if (isTRUE(compare.valids)) {
           counts.table.na <- function(freqs, freqs.na, type) {
             switch(
@@ -642,7 +651,7 @@
             )
           }
         }
-        ## 1.10 Run counts.table() function ------------------------------------------
+        ## 1.10 Run counts.table() function ------------------------------------
         if (isFALSE(compare.valids)) {
           freq.table <- counts.table(freqs, type = table.type)
         } else {
@@ -655,7 +664,7 @@
             freq.table <- rbind(freq.table, TOTAL)
           }
         }
-        ## 1.11 Round decimal values -------------------------------------------------
+        ## 1.11 Round decimal values -------------------------------------------
         if (table.type != "none") {
           freq.table[,
                      grep(pattern = "rel",
@@ -667,7 +676,7 @@
                                   value = FALSE)],
                   digits = n.digits + 2)
         }
-        ## 1.12 Show percent values --------------------------------------------------
+        ## 1.12 Show percent values --------------------------------------------
         if (isTRUE(show.percent)) {
           classes <- rownames(freq.table)
           freq.table[,
@@ -686,7 +695,7 @@
           freq.table <- data.frame(classes, freq.table,
                                    row.names = NULL)
         }
-        ## 1.13 Format cumulative values ---------------------------------------------
+        ## 1.13 Format cumulative values ---------------------------------------
         if (isFALSE(compare.valids)) {
           if (table.type != "none") {
             freq.table[nrow(freq.table),
@@ -706,7 +715,7 @@
         if (table.type == "none") {
           freq.table[, 2] <- NULL
         }
-        ## 1.14 Format classes -------------------------------------------------------
+        ## 1.14 Format classes -------------------------------------------------
         freq.table[, 1] <- ifelse(
           is.na(as.character(freq.table[, 1])) |
             nchar(as.character(freq.table[, 1])) == 0,
@@ -761,18 +770,18 @@
         if (isTRUE(use.thousands.mark)) {
           freq.table <- format(freq.table, big.mark = ",")
         }
-        ## 1.15 Return as data.frame or with Markdown format -------------------------
+        ## 1.15 Return as data.frame or with Markdown format -------------------
         if (isFALSE(as.markdown)) {
           return(freq.table)
         } else if (isTRUE(as.markdown)) {
           pander::pander(freq.table)
         }
     }
-    if  (is.vector(x) | is.factor(x)) {
-      ft <-  workhorse(x)
-    } else if(is.data.frame(x)) {
-      ft <-  lapply(x, workhorse)
-    }
+    if  (is.null(x) | is.vector(x) | is.factor(x) | is.atomic(x) |
+         inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))) {
+      ft <-  freq.distro(x)
+    } else if (is.data.frame(x) | is.list(x) | is.array(x) | is.matrix(x)) {
+      ft <-  lapply(x, freq.distro)
+    } 
     return(ft)
   }
-

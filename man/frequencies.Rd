@@ -10,13 +10,13 @@ frequencies(
   n.classes = NULL,
   lower.limit = NULL,
   upper.limit = NULL,
+  time.breaks = NULL,
+  svy.design = NULL,
+  sort.decreasing = NULL,
+  tidy.breaks = FALSE,
   na.count = TRUE,
   n.digits = 2,
   show.totals = TRUE,
-  sort.decreasing = NULL,
-  svy.design = NULL,
-  time.breaks = NULL,
-  tidy.breaks = FALSE,
   show.percent = TRUE,
   use.thousands.mark = FALSE,
   as.markdown = FALSE,
@@ -29,7 +29,7 @@ frequencies(
 )
 }
 \arguments{
-\item{x}{Vector or data.frane. A numeric or categorical variable of any type.}
+\item{x}{Vector or data.frame. A numeric or categorical variable of any type.}
 
 \item{weights}{Numeric. Weights for aggregating the categories in x. It should have the same length of x.}
 
@@ -39,19 +39,19 @@ frequencies(
 
 \item{upper.limit}{Numeric. Lower classes limit. Along with n.classes, it determines the bins of a distribution for continuous variables. Defaults to the maximum value of the numeric vector.}
 
+\item{time.breaks}{Character or integer. Specifies the aggregation class for date-time variables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.}
+
+\item{svy.design}{survey.design object. A survey design object from survey::package.}
+
+\item{sort.decreasing}{NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.}
+
+\item{tidy.breaks}{Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.}
+
 \item{na.count}{Logical. include NA values as part of the classes to be counted. If the vector has no missing values it will report 0 occurrences when TRUE is selected.}
 
 \item{n.digits}{Integer. number of decimal places to display for percentage frequencies. The number of decimals shown for relative frequencies is n.digits + 2.}
 
 \item{show.totals}{Logical. Show the sum of frequencies and relative/percentage frequencies.}
-
-\item{sort.decreasing}{NULL or logical. sort frequencies decreasingly, increasingly according to frequency counts. The default, NULL, sorts frequencies according with the classes.}
-
-\item{svy.design}{survey.design object. A survey design object from survey::package.}
-
-\item{time.breaks}{Character or integer. Specifies the aggregation class for date-time vaiables: "secs", "mins", "hours", "days", "weeks", "months","years", "DSTdays" or "quarters". If an integer it specifies an arbitrary number of classes for all the observations.}
-
-\item{tidy.breaks}{Logical. Uses the default classes for histograms, allowing the frequency table of numeric values to match the default graphical bins for an histogram. It overrides the value for n.classes.}
 
 \item{show.percent}{Logical. Show relative frequencies as percentage frequencies. Default is TRUE.}
 
