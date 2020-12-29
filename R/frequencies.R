@@ -441,136 +441,136 @@
           counts.table.na <- function(freqs, freqs.na, type) {
             switch(
               type,
-              none = cbind(freqs.n = freqs.na),
+              none = cbind(freqs_n = freqs.na),
               only.rel.cumulative = cbind(
-                rel.cumulative.freqs.n =
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid = cumsum(prop.table(freqs))
+                rel_cumulative_freqs_valid = cumsum(prop.table(freqs))
               ),
               only.cumulative = cbind(
-                cumulative.freqs.n = cumsum(freqs.na),
-                cumulative.freqs.valid = cumsum(freqs)
+                cumulative_freqs_n = cumsum(freqs.na),
+                cumulative_freqs_valid = cumsum(freqs)
               ),
               only.cumulatives = cbind(
-                cumulative.freqs.n = cumsum(freqs.na),
-                cumulative.freqs.valid = cumsum(freqs),
-                rel.cumulative.freqs.n =
+                cumulative_freqs_n = cumsum(freqs.na),
+                cumulative_freqs_valid = cumsum(freqs),
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(prop.table(freqs))
               ),
               only.rel.freq = cbind(
-                relative.freqs.n = prop.table(freqs.na),
-                relative.freqs.valid = prop.table(freqs)
+                relative_freqs_n = prop.table(freqs.na),
+                relative_freqs_valid = prop.table(freqs)
               ),
               only.relatives = cbind(
-                relative.freqs.n = prop.table(freqs.na),
-                relative.freqs.valid = prop.table(freqs),
-                rel.cumulative.freqs.n =
+                relative_freqs_n = prop.table(freqs.na),
+                relative_freqs_valid = prop.table(freqs),
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(prop.table(freqs))
               ),
               relative.and.cumulative = cbind(
-                relative.freqs.n =
+                relative_freqs_n =
                   prop.table(freqs.na),
-                relative.freqs.valid =
+                relative_freqs_valid =
                   prop.table(freqs)
               ),
-              cumulative.freqs.n =
+              cumulative_freqs_n =
                 cumsum(freqs.na),
-              cumulative.freqs.valid =
+              cumulative_freqs_valid =
                 cumsum(freqs),
               relative.and.cumulatives = cbind(
-                relative.freqs.n =
+                relative_freqs_n =
                   prop.table(freqs.na),
-                relative.freqs.valid =
+                relative_freqs_valid =
                   prop.table(freqs),
-                cumulative.freqs.n =
+                cumulative_freqs_n =
                   cumsum(freqs.na),
-                cumulative.freqs.valid =
+                cumulative_freqs_valid =
                   cumsum(freqs),
-                rel.cumulative.freqs.n =
+                rel_cumulative_freqs.n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(c(prop.table(freqs)))
               ),
-              only.freqs = cbind(freqs.n = freqs.na,
-                                 freqs.valid = c(freqs)),
+              only.freqs = cbind(freqs_n = freqs.na,
+                                 freqs_valid = c(freqs)),
               freqs.and.rel.cumulative = cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                rel.cumulative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(prop.table(freqs))
               ),
               freqs.and.cumulative =  cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                cumulative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                cumulative_freqs_n =
                   cumsum(freqs.na),
-                cumulative.freqs.valid =
+                cumulative_freqs_valid =
                   cumsum(freqs)
               ),
               freqs.and.cumulatives = cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                cumulative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                cumulative_freqs_n =
                   cumsum(freqs.na),
-                cumulative.freqs.valid =
+                cumulative_freqs_valid =
                   cumsum(freqs),
-                rel.cumulative.freqs.n =
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(prop.table(freqs))
               ),
               freqs.and.relative = cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                relative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                relative_freqs_n =
                   prop.table(freqs.na),
-                relative.freqs.valid =
+                relative_freqs_valid =
                   c(prop.table(freqs))
               ),
               freqs.and.relatives = cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                relative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                relative_freqs_n =
                   prop.table(freqs.na),
-                relative.freqs.valid =
+                relative_freqs_valid =
                   prop.table(freqs),
-                rel.cumulative.freqs.n =
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(prop.table(freqs))
               ),
               freqs.relative.and.cumulative = cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                relative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                relative_freqs_n =
                   prop.table(freqs.na),
-                relative.freqs.valid =
+                relative_freqs_valid =
                   prop.table(freqs),
-                cumulative.freqs.n =
+                cumulative_freqs_n =
                   cumsum(freqs.na),
-                cumulative.freqs.valid =
+                cumulative_freqs_valid =
                   cumsum(freqs)
               ),
               all = cbind(
-                freqs.n = freqs.na,
-                freqs.valid = freqs,
-                relative.freqs.n =
+                freqs_n = freqs.na,
+                freqs_valid = freqs,
+                relative_freqs_n =
                   prop.table(freqs.na),
-                relative.freqs.valid =
+                relative_freqs_valid =
                   prop.table(freqs),
-                cumulative.freqs.n =
+                cumulative_freqs_n =
                   cumsum(freqs.na),
-                cumulative.freqs.valid =
+                cumulative_freqs_valid =
                   cumsum(freqs),
-                rel.cumulative.freqs.n =
+                rel_cumulative_freqs_n =
                   cumsum(prop.table(freqs.na)),
-                rel.cumulative.freqs.valid =
+                rel_cumulative_freqs_valid =
                   cumsum(prop.table(freqs))
               )
             ) # switch closing parenthesis
@@ -580,72 +580,72 @@
             switch(
               type,
               none = cbind(freqs),
-              only.rel.cumulative = cbind(rel.cumulative.freqs =
+              only.rel.cumulative = cbind(rel_cumulative_freqs =
                                             cumsum(prop.table(freqs))),
-              only.cumulative = cbind(cumulative.freqs = cumsum(freqs)),
+              only.cumulative = cbind(cumulative_freqs = cumsum(freqs)),
               only.cumulatives = cbind(
-                cumulative.freqs = cumsum(freqs),
-                rel.cumulative.freqs =
+                cumulative_freqs = cumsum(freqs),
+                rel_cumulative_freqs =
                   cumsum(prop.table(freqs))
               ),
               only.rel.freq = cbind(relative.freqs = prop.table(freqs)),
               only.relatives = cbind(
-                relative.freqs = prop.table(freqs),
-                rel.cumulative.freqs =
+                relative_freqs = prop.table(freqs),
+                rel_cumulative_freqs =
                   cumsum(prop.table(freqs))
               ),
               relative.and.cumulative = cbind(
-                relative.freqs =
+                relative_freqs =
                   prop.table(freqs),
-                cumulative.freqs =
+                cumulative_freqs =
                   cumsum(freqs)
               ),
               relative.and.cumulatives = cbind(
-                relative.freqs =
+                relative_freqs =
                   prop.table(freqs),
-                cumulative.freqs =
+                cumulative_freqs =
                   cumsum(freqs),
-                rel.cumulative.freqs =
+                rel_cumulative_freqs =
                   cumsum(prop.table(freqs))
               ),
               only.freqs = cbind(freqs),
               freqs.and.rel.cumulative = cbind(freqs,
-                                               rel.cumulative.freqs =
+                                               rel_cumulative_freqs =
                                                  cumsum(prop.table(freqs))),
               freqs.and.cumulative =  cbind(freqs,
-                                            cumulative.freqs =
+                                            cumulative_freqs =
                                               cumsum(freqs)),
               freqs.and.cumulatives = cbind(
                 freqs,
-                cumulative.freqs =
+                cumulative_freqs =
                   cumsum(freqs),
-                rel.cumulative.freqs =
+                rel_cumulative_freqs =
                   cumsum(prop.table(freqs))
               ),
               freqs.and.relative = cbind(freqs,
-                                         relative.freqs =
+                                         relative_freqs =
                                            prop.table(freqs)),
               freqs.and.relatives = cbind(
                 freqs,
-                relative.freqs =
+                relative_freqs =
                   prop.table(freqs),
-                rel.cumulative.freqs =
+                rel_cumulative_freqs =
                   cumsum(prop.table(freqs))
               ),
               freqs.relative.and.cumulative = cbind(
                 freqs,
-                relative.freqs =
+                relative_freqs =
                   prop.table(freqs),
-                cumulative.freqs =
+                cumulative_freqs =
                   cumsum((freqs))
               ),
               all = cbind(
                 freqs,
-                relative.freqs =
+                relative_freqs =
                   prop.table(freqs),
-                cumulative.freqs =
+                cumulative_freqs =
                   cumsum((freqs)),
-                rel.cumulative.freqs =
+                rel_cumulative_freqs =
                   cumsum(prop.table(freqs))
               )
             )
@@ -735,8 +735,9 @@
             indices <-
               which(grepl(pattern = "[[:digit:]]", x = as.character(freq.table[, 1])))
             b <- a[indices]
+            
             pattern <-
-              "([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])([+-]?[[:digit:]]+\\.*[[:digit:]]*)([[:punct:]])"
+              "(\\[?)([-]?[[:digit:]]+[\\.]?[[:digit:]]*[e]?[+-]?[[:digit:]]*)([,]?)([-]?[[:digit:]]+[\\.]?[[:digit:]]*[e]?[+-]?[[:digit:]]*)([[:punct:]]?)"
             proto <-
               data.frame(
                 limit.type.ll = character(),
@@ -746,29 +747,32 @@
                 limit.type.ul = character()
               )
             (limits <- utils::strcapture(pattern, b, proto))
-            index.max <- which.max(nchar(format(limits[,2])))
-            limits[index.max, 2]
-            digits <-
+            
+            index.max.digits   <- which.max(limits$lower.limit)
+            index.max.decimals <- which.max(nchar(format(limits$lower.limit)))
+            use.digits <-
               nchar(unlist(strsplit(
-                x = as.character(limits[index.max, 2]),
+                x = as.character(limits[index.max.digits, 2]),
                 split = "[.]"
               )))[1]
-            decimals <-
+            use.decimals <-
               nchar(unlist(strsplit(
-                x = as.character(limits[index.max, 2]),
+                x = as.character(limits[index.max.decimals, 2]),
                 split = "[.]"
               )))[2]
-            decimals <- ifelse(is.na(decimals), 0, decimals)
-            limits <-
-              format(limits, digits = digits, nsmall = decimals, big.mark = " ")
+            use.decimals <- ifelse(is.na(use.decimals), 0, use.decimals)
+            limits <- 
+              format(limits, digits = use.digits, nsmall = use.decimals, 
+                     big.mark = " ")
             limits <- do.call(paste0, limits)
-            freq.table[indices, 1] <- limits
+            freq.table[indices,1] <- limits
           }
         }
-        freq.table[, 1] <- format(freq.table[, 1], justify = "left",
-                                  na.encode = FALSE)
+        
+        # Thousands mark
         if (isTRUE(use.thousands.mark)) {
-          freq.table <- format(freq.table, big.mark = ",")
+          freq.table[,2:ncol(freq.table)] <- 
+            format(freq.table[,2:ncol(freq.table)], big.mark = ",")
         }
         ## 1.15 Return as data.frame or with Markdown format -------------------
         if (isFALSE(as.markdown)) {
