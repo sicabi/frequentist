@@ -251,8 +251,11 @@ frequencies <- function(x = NULL,
     } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))) {
       if (is.character(time.breaks)) {
         if (length(time.breaks) == 1L) {
-          if (time.breaks %in% c("secs", "mins", "hours", "days", "weeks", "months", "years", "DSTdays", "quarters")) {
-            n.breaks <- time.breaks 
+          valids <- c("secs", "mins", "hours", 
+                      "days", "weeks", "months", "years", "DSTdays", "quarters")
+          index.valids <- pmatch(time.breaks, valids)
+          if (!is.na(index.valids)) {
+            n.breaks <- valids[index.valids]
           } else {
             stop("Please set a valid time.breaks argument for date-time variable. E.g.: \"secs\", \"mins\", \"hours\", \"days\", \"weeks\", \"months\", \"years\", \"DSTdays\" or \"quarters\", an integer value or vector, or a date-time value or vector")
           }
@@ -308,9 +311,11 @@ frequencies <- function(x = NULL,
                             useNA = "no")
           freqs.na <- c(freqs.na, na.values)
         } else if (is.numeric(weights)) {
-          freqs <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+          freqs <- tapply(X = weights, INDEX = x, 
+                          FUN = function(X) sum(X, na.rm = TRUE))
           freqs <- c(freqs, "NA VALUES" = 0)
-          freqs.na <- tapply(X = weights, INDEX = x, FUN = function(X) sum(X, na.rm = TRUE))
+          freqs.na <- tapply(X = weights, INDEX = x, 
+                             FUN = function(X) sum(X, na.rm = TRUE))
           freqs.na <- c(freqs.na, na.values)
         }
       } else if (inherits(x, c("POSIXt", "POSIXct", "POSIXlt", "Date"))  &
@@ -329,7 +334,8 @@ frequencies <- function(x = NULL,
                           useNA = "no")
         freqs.na <- c(freqs.na, na.values)
       } else if (isTRUE(inherits(svy.design, 
-                                 c("survey.design2", "survey.design", "svyrep.design")))) {
+                                 c("survey.design2", "survey.design", 
+                                   "svyrep.design")))) {
         freqs.na <- survey::svytable(stats::as.formula( paste0( "~" , x)),
                                      design = svy.design, round = TRUE)
         freqs    <- survey::svytable(stats::as.formula( paste0( "~" , x)),
